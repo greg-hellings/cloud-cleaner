@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+from setuptools import find_packages
+from distutils.core import setup
+
+setup(
+    name='cloud-cleaner',
+    version='0.0.1',
+    license='BSD',
+    author='Gregory Hellings',
+    author_email='greg.hellings@gmail.com',
+    url='https://github.com/greg-hellings/cloud-cleaner',
+    description='Utilities to clean up old OpenStack resources',
+    packages=find_packages('src'),
+    package_dir={'cloud_cleaner': 'src/cloud_cleaner'},
+    keywords=['cloud', 'openstack'],
+    classifiers=[
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: Unix',
+        'Operating System :: POSIX',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Utilities',
+    ],
+    install_requires=[
+        'shade',
+        'os-client-config'
+    ]
+)

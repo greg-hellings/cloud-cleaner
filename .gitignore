@@ -1,0 +1,8 @@
+*.egg-info
+*.pyc
+*.pyo
+.idea
+.tox
+.pytest_cache
+.coverage
+htmlcov
