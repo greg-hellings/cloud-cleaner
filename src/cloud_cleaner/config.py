@@ -14,6 +14,9 @@ class CloudCleanerConfig(object):
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args
+        # Defined after options are parsed
+        self.__options = None
+        self.__cloud = None
 
     def add_subparser(self, name: str) -> _SubParsersAction:
         """
@@ -46,6 +49,11 @@ class CloudCleanerConfig(object):
         """
         results = self.__parser.parse_args(self.__args)
         self.__options = vars(results)
+        try:
+            self.__cloud = self.__cloud_config.get_one_cloud(argparse=self.__options)
+        except:
+            # No cloud was specified on the command line
+            self.__cloud = None
         return results
 
     def get_arg(self, name: str) -> any:
@@ -64,3 +72,13 @@ class CloudCleanerConfig(object):
         :return: The string name of the resource selected from the command line
         """
         return self.__options['resource']
+
+    def get_cloud(self):
+        """
+        Get the cloud that was specified by the command line options. Note that
+        this should only be called after #parse_args is called, otherwise it
+        will only return None.
+
+        :return: Cloud option parsed, or None
+        """
+        return self.__cloud

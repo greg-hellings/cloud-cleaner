@@ -19,3 +19,8 @@ class TestConfig(TestCase):
         # ArgumentError raises SystemExit internally, apparently
         with self.assertRaises(SystemExit):
             config.parse_args()
+
+    def test_get_cloud_is_none(self):
+        parser = ArgumentParser()
+        config = CloudCleanerConfig(parser=parser, args=[])
+        self.assertIsNone(config.get_cloud())
