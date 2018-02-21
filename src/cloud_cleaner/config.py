@@ -6,8 +6,12 @@ import sys
 
 class CloudCleanerConfig(object):
     def __init__(self,
-                 parser: ArgumentParser=ArgumentParser(),
-                 args: list=sys.argv):
+                 parser: ArgumentParser=None,
+                 args: list=None):
+        if parser is None:
+            parser = ArgumentParser()
+        if args is None:
+            args = sys.argv
         self.__cloud_config = os_client_config.OpenStackConfig()
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
