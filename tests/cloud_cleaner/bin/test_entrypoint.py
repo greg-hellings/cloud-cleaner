@@ -20,3 +20,7 @@ class TestEntrypoint(TestCase):
         cloud_clean(args=["server", "--name", "derp"], config=config)
         self.assertEqual("server", config.get_resource())
         self.assertEqual("derp", config.get_arg("name"))
+
+    def test_resource_type(self):
+        all_resources[0].process = Mock()
+        cloud_clean(args=["server"])

@@ -11,12 +11,14 @@ class TestFip(TestCase):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=["fip"])
         config.add_subparser = Mock()
-        Fip(config)
+        fip = Fip()
+        fip.register(config)
         config.add_subparser.assert_called_once_with(Fip.type_name)
 
     def test_resource_handled_from_args(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[Fip.type_name])
-        Fip(config)
+        fip = Fip()
+        fip.register(config)
         config.parse_args()
         self.assertEqual(Fip.type_name, config.get_resource())

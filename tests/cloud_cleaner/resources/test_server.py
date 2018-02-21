@@ -10,14 +10,16 @@ class ServerTest(TestCase):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
         config.add_subparser = Mock()
-        Server(config)
+        server = Server()
+        server.register(config)
         config.add_subparser.assert_called_once_with(Server.type_name)
 
     def test_parser_with_name(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser,
                                     args=["server", "--name", "test-.*"])
-        Server(config)
+        server = Server()
+        server.register(config)
         config.parse_args()
         self.assertEqual("test-.*", config.get_arg("name"))
         self.assertEqual(Server.type_name, config.get_resource())

@@ -5,10 +5,6 @@ from cloud_cleaner.resources.fip import Fip
 
 
 class TestAll(TestCase):
-    all_resources = [
-        Server,
-        Fip
-    ]
-
     def test_all_is_right(self):
-        self.assertEqual(all_resources, TestAll.all_resources)
+        self.assertIsInstance(all_resources[0], Server)
+        self.assertIsInstance(all_resources[1], Fip)
