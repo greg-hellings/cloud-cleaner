@@ -54,8 +54,9 @@ class CloudCleanerConfig(object):
         results = self.__parser.parse_args(self.__args)
         self.__options = vars(results)
         try:
-            self.__cloud = self.__cloud_config.get_one_cloud(argparse=self.__options)
-        except:
+            self.__cloud = self.__cloud_config.get_one_cloud(
+                argparse=self.__options)
+        except Exception:
             # No cloud was specified on the command line
             self.__cloud = None
         return results

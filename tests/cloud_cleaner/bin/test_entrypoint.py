@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 from cloud_cleaner.bin.entrypoint import cloud_clean
 from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import all_resources
-from cloud_cleaner.resources.server import Server
 
 
 class TestEntrypoint(TestCase):
