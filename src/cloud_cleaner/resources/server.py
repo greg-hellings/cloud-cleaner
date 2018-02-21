@@ -12,6 +12,6 @@ class Server(Resource):
         """
         super(Server, self).__init__(config)
         _desc = "Regex to match the name of the servers"
-        self._sub_config.add_argument("--name", "-n", description=_desc)
+        self._sub_config.add_argument("--name", "-n", help=_desc)
         _desc = "Minimum age (1d, 2w, 6m, 1y)"
-        self._sub_config.add_argument("--age", "-a", description=_desc)
+        self._sub_config.add_argument("--age", "-a", help=_desc)

@@ -25,8 +25,9 @@ class CloudCleanerConfig(object):
         """
         sub_parser = self.__sub_parsers.add_parser(name)
         self.__sub_parser_set[name] = sub_parser
+        return sub_parser
 
-    def set_args(self, args: list) -> CloudCleanerConfig:
+    def set_args(self, args: list):
         """
         Sets args for the current execution, in case there are any args that
         might have been altered or removed from the set by the first call
@@ -37,10 +38,29 @@ class CloudCleanerConfig(object):
         self.__args = args
         return self
 
-    def parse_arguments(self) -> ArgumentParser:
+    def parse_args(self) -> ArgumentParser:
         """
         Parse all arguments currently attached to this config object
 
         :return: Parsed arguments
         """
-        return self.__parser.parse_args(self.__args)
+        results = self.__parser.parse_args(self.__args)
+        self.__options = vars(results)
+        return results
+
+    def get_arg(self, name: str) -> any:
+        """
+        Fetch the value of one of the command line arguments from the argparser
+
+        :param name: The command line argument that is requested
+        :return: The value of the name requested from
+        """
+        return self.__options[name]
+
+    def get_resource(self) -> str:
+        """
+        Get the name of the resource that is being requested
+
+        :return: The string name of the resource selected from the command line
+        """
+        return self.__options['resource']
