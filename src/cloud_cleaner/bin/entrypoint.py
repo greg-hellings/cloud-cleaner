@@ -12,7 +12,8 @@ def cloud_clean(args: list=sys.argv,
     else:
         config.set_args(args)
     # Register all the resource types and options with the configurator
-    resources = {}
-    for resource in all_resources:
-        resources[resource.type_name] = resource.register(config)
+    for resource in all_resources.values():
+        resource.register(config)
     config.parse_args()
+    # Call the process method for the target resource type
+    all_resources[config.get_resource()].process()

@@ -18,3 +18,11 @@ class Resource(object):
         """
         self._config = config
         self._sub_config = config.add_subparser(self.type_name)
+
+    def process(self):
+        raise UnimplementedError("Must override this method")
+
+
+class UnimplementedError(Exception):
+    def __init__(self, msg: str):
+        super(UnimplementedError, self).__init__(message=msg)

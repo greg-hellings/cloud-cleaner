@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, _SubParsersAction
+from shade import OpenStackCloud
 
 import os_client_config
 import sys
@@ -21,6 +22,7 @@ class CloudCleanerConfig(object):
         # Defined after options are parsed
         self.__options = None
         self.__cloud = None
+        self.__shade = None
 
     def add_subparser(self, name: str) -> _SubParsersAction:
         """
@@ -54,9 +56,10 @@ class CloudCleanerConfig(object):
         results = self.__parser.parse_args(self.__args)
         self.__options = vars(results)
         try:
-            self.__cloud = self.__cloud_config.get_one_cloud(
-                argparse=self.__options)
-        except Exception:
+            cloud = self.__cloud_config.get_one_cloud(argparse=results)
+            self.__cloud = cloud
+            self.__shade = OpenStackCloud(self.__cloud)
+        except KeyboardInterrupt:
             # No cloud was specified on the command line
             self.__cloud = None
         return results
@@ -87,3 +90,12 @@ class CloudCleanerConfig(object):
         :return: Cloud option parsed, or None
         """
         return self.__cloud
+
+    def get_shade(self) -> OpenStackCloud:
+        """
+        Fetch the shade object attached to the cloud that has been configured
+        for this run.
+
+        :return: The shade object
+        """
+        return self.__shade

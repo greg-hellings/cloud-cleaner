@@ -31,5 +31,10 @@ setup(
     install_requires=[
         'shade',
         'os-client-config'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'cloud-clean=cloud_cleaner.bin.entrypoint:cloud_clean'
+        ]
+    }
 )

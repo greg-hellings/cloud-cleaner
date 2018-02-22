@@ -11,7 +11,8 @@ class TestEntrypoint(TestCase):
     def test_cloud_cleaner_noopts(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
-        cloud_clean([], config)
+        with self.assertRaises(KeyError):
+            cloud_clean([], config)
         self.assertIsNone(config.get_resource())
 
     def test_cloud_cleaner_server(self):
@@ -21,5 +22,6 @@ class TestEntrypoint(TestCase):
         self.assertEqual("derp", config.get_arg("name"))
 
     def test_resource_type(self):
-        all_resources[0].process = Mock()
+        all_resources["server"].process = Mock()
         cloud_clean(args=["server"])
+        self.assertEqual(1, len(all_resources["server"].process.mock_calls))
