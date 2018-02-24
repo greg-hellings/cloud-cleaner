@@ -10,8 +10,7 @@ setup(
     author_email='greg.hellings@gmail.com',
     url='https://github.com/greg-hellings/cloud-cleaner',
     description='Utilities to clean up old OpenStack resources',
-    packages=find_packages('src'),
-    package_dir={'cloud_cleaner': 'src/cloud_cleaner'},
+    packages=find_packages(exclude=('tests')),
     keywords=['cloud', 'openstack'],
     classifiers=[
         'License :: OSI Approved :: BSD License',

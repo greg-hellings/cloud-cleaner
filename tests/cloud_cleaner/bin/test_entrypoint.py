@@ -17,9 +17,11 @@ class TestEntrypoint(TestCase):
 
     def test_cloud_cleaner_server(self):
         config = CloudCleanerConfig(args=[])
+        all_resources["server"].process = Mock()
         cloud_clean(args=["server", "--name", "derp"], config=config)
         self.assertEqual("server", config.get_resource())
         self.assertEqual("derp", config.get_arg("name"))
+        self.assertEqual(1, len(all_resources["server"].process.mock_calls))
 
     def test_resource_type(self):
         all_resources["server"].process = Mock()

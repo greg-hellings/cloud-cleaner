@@ -1,8 +1,12 @@
 from argparse import ArgumentParser, _SubParsersAction
 from shade import OpenStackCloud
 
+import logging
 import os_client_config
 import sys
+
+
+date_format = '%Y-%m-%dT%H:%M:%SZ'
 
 
 class CloudCleanerConfig(object):
@@ -23,6 +27,7 @@ class CloudCleanerConfig(object):
         self.__options = None
         self.__cloud = None
         self.__shade = None
+        self.__log = logging.getLogger("cloud_cleaner")
 
     def add_subparser(self, name: str) -> _SubParsersAction:
         """
@@ -99,3 +104,7 @@ class CloudCleanerConfig(object):
         :return: The shade object
         """
         return self.__shade
+
+    # LOGGING FUNCTIONS
+    def info(self, *args):
+        self.__log.info(*args)

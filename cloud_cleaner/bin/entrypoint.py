@@ -4,7 +4,7 @@ from cloud_cleaner.resources import all_resources
 import sys
 
 
-def cloud_clean(args: list=sys.argv,
+def cloud_clean(args: list=sys.argv[1:],
                 config: CloudCleanerConfig=None):
     # Construct or configure cloud cleaner config
     if config is None:
