@@ -29,7 +29,8 @@ setup(
     ],
     install_requires=[
         'shade',
-        'os-client-config'
+        'os-client-config',
+        'munch'
     ],
     entry_points={
         'console_scripts': [
