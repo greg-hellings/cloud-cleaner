@@ -35,11 +35,13 @@ class Server(Resource):
             self.__shade = self._config.get_shade()
         self._config.info("Connecting to OpenStack to retrieve server list")
         self.__targets = self.__shade.list_servers()
-        self._config.debug("Found servers: ", [t.name for t in self.__targets])
+        self._config.debug("Found servers: ")
+        [self._config.debug("   *** " + t.name) for t in self.__targets]
         # Process for time
         self._interval = self.parse_interval(self._config.get_arg('age'))
         self.__targets = [t for t in self.__targets if self.__right_age(t)]
-        self._config.debug("Parsed ages, servers remaining: ", [t.name for t in self.__targets])
+        self._config.debug("Parsed ages, servers remaining: ")
+        [self._config.debug("   *** " + t.name) for t in self.__targets]
 
     def clean(self):
         """
@@ -56,5 +58,5 @@ class Server(Resource):
     def __right_age(self, target: Munch):
         system_age = datetime.strptime(target.created, date_format)
         system_age = system_age.replace(tzinfo=timezone.utc)
-        self._config.info(target.id, self._now, system_age + self._interval)
+        self._config.debug("System %s, age %s" % (target.name, system_age))
         return self._now > (system_age + self._interval)
