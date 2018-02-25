@@ -83,7 +83,8 @@ class ServerTest(TestCase):
     def test_parser_with_name(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser,
-                                    args=["server", "--name", "test-.*"])
+                                    args=["--os-auth-url", "http://no.com",
+                                          "server", "--name", "test-.*"])
         server = Server()
         server.register(config)
         config.parse_args()
@@ -91,7 +92,8 @@ class ServerTest(TestCase):
         self.assertEqual(Server.type_name, config.get_resource())
 
     def test_delete_3_day_old_servers(self):
-        config = CloudCleanerConfig(args=["server", "--age", "3d"])
+        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
+                                          "server", "--age", "3d"])
         config.get_shade = Mock(return_value=shade)
         calls = [call('3'), call('4'), call('5'), call('6')]
         server = Server(now=current_time)

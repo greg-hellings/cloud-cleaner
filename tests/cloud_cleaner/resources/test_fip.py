@@ -9,7 +9,9 @@ from cloud_cleaner.resources.fip import Fip
 class TestFip(TestCase):
     def test_resource_type(self):
         parser = ArgumentParser()
-        config = CloudCleanerConfig(parser=parser, args=["fip"])
+        config = CloudCleanerConfig(parser=parser, args=["--os-auth-url",
+                                                         "http://no.com",
+                                                         "fip"])
         config.add_subparser = Mock()
         fip = Fip()
         fip.register(config)
@@ -17,7 +19,9 @@ class TestFip(TestCase):
 
     def test_resource_handled_from_args(self):
         parser = ArgumentParser()
-        config = CloudCleanerConfig(parser=parser, args=[Fip.type_name])
+        config = CloudCleanerConfig(parser=parser, args=["--os-auth-url",
+                                                         "httpp://no.com",
+                                                         Fip.type_name])
         fip = Fip()
         fip.register(config)
         config.parse_args()

@@ -12,18 +12,19 @@ class TestEntrypoint(TestCase):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
         with self.assertRaises(KeyError):
-            cloud_clean([], config)
+            cloud_clean(["--os-auth-url", "http://no.com"], config)
         self.assertIsNone(config.get_resource())
 
     def test_cloud_cleaner_server(self):
         config = CloudCleanerConfig(args=[])
         all_resources["server"].process = Mock()
-        cloud_clean(args=["server", "--name", "derp"], config=config)
+        cloud_clean(args=["--os-auth-url", "http://no.com", "server",
+                          "--name", "derp"], config=config)
         self.assertEqual("server", config.get_resource())
         self.assertEqual("derp", config.get_arg("name"))
         self.assertEqual(1, len(all_resources["server"].process.mock_calls))
 
     def test_resource_type(self):
         all_resources["server"].process = Mock()
-        cloud_clean(args=["server"])
+        cloud_clean(args=["--os-auth-url", "http://no.com", "server"])
         self.assertEqual(1, len(all_resources["server"].process.mock_calls))

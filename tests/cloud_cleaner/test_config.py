@@ -8,7 +8,7 @@ class TestConfig(TestCase):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
         config.add_subparser("item")
-        config.set_args(["item"])
+        config.set_args(["--os-auth-url", "http://no.com", "item"])
         config.parse_args()
         self.assertEqual("item", config.get_resource())
 
