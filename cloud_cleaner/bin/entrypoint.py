@@ -17,3 +17,5 @@ def cloud_clean(args: list=sys.argv[1:],
     config.parse_args()
     # Call the process method for the target resource type
     all_resources[config.get_resource()].process()
+    if config.get_arg("force"):
+        all_resources[config.get_resource()].clean()

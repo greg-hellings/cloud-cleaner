@@ -4,10 +4,11 @@ from cloud_cleaner.config import CloudCleanerConfig, date_format
 from cloud_cleaner.resources import Server
 from argparse import ArgumentParser
 from munch import munchify
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 current_time = datetime.strptime('2018-02-23T16:00:00Z', date_format)
+current_time = current_time.replace(tzinfo=timezone.utc)
 sample_servers = [
     # Server still being built out by OpenStack, should remain
     munchify({

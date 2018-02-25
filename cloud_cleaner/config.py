@@ -20,6 +20,16 @@ class CloudCleanerConfig(object):
         self.__cloud_config = os_client_config.OpenStackConfig()
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
+        # Register global options
+        _help = "Perform delete operations, don't just report them. " \
+                "By default, the command executes a 'dry run'. Add this " \
+                "switch to perform a full run."
+        self.__parser.add_argument("--force", "-f",
+                                   help=_help,
+                                   action='store_true')
+        _help = "Verbosity level. Add more times for more output (up to 2 times)"
+        self.__parser.add_argument("-v", "--verbose", help=_help,
+                                   action='count', default=0)
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args
@@ -60,9 +70,20 @@ class CloudCleanerConfig(object):
         """
         results = self.__parser.parse_args(self.__args)
         self.__options = vars(results)
+        # Set logging level based on verbosity
+        debug = self.get_arg('verbose')
+        if debug == 0:
+            self.__log.setLevel('WARNING')
+        if debug == 1:
+            self.__log.setLevel('INFO')
+        if debug >= 2:
+            self.__log.setLevel('DEBUG')
         try:
+            self.info("Getting cloud connection")
+            self.debug("Parsing cloud connection information")
             cloud = self.__cloud_config.get_one_cloud(argparse=results)
             self.__cloud = cloud
+            self.debug("Constructing shade client")
             self.__shade = OpenStackCloud(self.__cloud)
         except KeyboardInterrupt:
             # No cloud was specified on the command line
@@ -106,5 +127,11 @@ class CloudCleanerConfig(object):
         return self.__shade
 
     # LOGGING FUNCTIONS
-    def info(self, *args):
-        self.__log.info(*args)
+    def info(self, msg, *args):
+        self.__log.info(msg, *args)
+
+    def debug(self, msg, *args):
+        self.__log.debug(msg, *args)
+
+    def warning(self, msg, *args):
+        self.__log.warning(msg, *args)
