@@ -38,6 +38,7 @@ class CloudCleanerConfig(object):
         self.__cloud = None
         self.__shade = None
         self.__log = logging.getLogger("cloud_cleaner")
+        self.__log.addHandler(logging.StreamHandler())
 
     def add_subparser(self, name: str) -> _SubParsersAction:
         """
@@ -73,11 +74,13 @@ class CloudCleanerConfig(object):
         # Set logging level based on verbosity
         debug = self.get_arg('verbose')
         if debug == 0:
-            self.__log.setLevel('WARNING')
+            self.__log.setLevel(logging.WARNING)
         if debug == 1:
-            self.__log.setLevel('INFO')
+            self.__log.setLevel(logging.INFO)
+            self.__log.info("Setting logging level to info")
         if debug >= 2:
-            self.__log.setLevel('DEBUG')
+            self.__log.setLevel(logging.DEBUG)
+            self.__log.info("Setting logging level to debug")
         try:
             self.info("Getting cloud connection")
             self.debug("Parsing cloud connection information")
