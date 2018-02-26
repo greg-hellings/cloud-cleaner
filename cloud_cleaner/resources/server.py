@@ -87,7 +87,6 @@ class Server(Resource):
         self._config.debug("Parsed names, servers remaining: ")
         [self._config.debug("   *** " + t.name) for t in self.__targets]
 
-
     def __right_age(self, target: Munch) -> bool:
         system_age = datetime.strptime(target.created, date_format)
         system_age = system_age.replace(tzinfo=timezone.utc)
@@ -95,5 +94,5 @@ class Server(Resource):
         return self._now > (system_age + self._interval)
 
     def __right_name(self, target: Munch) -> bool:
-        return not self.__skip_name.fullmatch(target.name) and \
-               self.__name.fullmatch(target.name)
+        return not self.__skip_name.match(target.name) and \
+               self.__name.match(target.name)
