@@ -15,6 +15,7 @@ class Server(Resource):
         self.__shade = None
         self.__targets = []
         self._interval = None
+        # Default objects that pass through all instances without filtering
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
 
@@ -46,22 +47,9 @@ class Server(Resource):
         self._config.debug("Found servers: ")
         [self._config.debug("   *** " + t.name) for t in self.__targets]
         # Process for time
-        self._config.info("Parsing dates")
-        self._interval = self.parse_interval(self._config.get_arg('age'))
-        self.__targets = [t for t in self.__targets if self.__right_age(t)]
-        self._config.debug("Parsed ages, servers remaining: ")
-        [self._config.debug("   *** " + t.name) for t in self.__targets]
+        self.__process_dates()
         # Process for name
-        self._config.info("Parsing names")
-        skip_name = self._config.get_arg("skip_name")
-        if skip_name is not None:
-            self.__skip_name = re.compile(skip_name)
-        name = self._config.get_arg('name')
-        if name is not None:
-            self.__name = re.compile(name)
-        self.__targets = [t for t in self.__targets if self.__right_name(t)]
-        self._config.debug("Parsed names, servers remaining: ")
-        [self._config.debug("   *** " + t.name) for t in self.__targets]
+        self.__process_names()
 
     def clean(self):
         """
@@ -74,6 +62,31 @@ class Server(Resource):
             self.__shade = self._config.get_shade()
         for target in self.__targets:
             self.__shade.delete_server(target.id)
+
+    def __process_dates(self):
+        age = self._config.get_arg('age')
+        if age is not None:
+            self._config.info("Parsing dates")
+            self._interval = self.parse_interval(self._config.get_arg('age'))
+            self._config.debug("Working with age %s" % (self._interval,))
+            self.__targets = [t for t in self.__targets if self.__right_age(t)]
+            self._config.debug("Parsed ages, servers remaining: ")
+            [self._config.debug("   *** " + t.name) for t in self.__targets]
+        else:
+            self._config.info("No age provided")
+
+    def __process_names(self):
+        skip_name = self._config.get_arg("skip_name")
+        if skip_name is not None:
+            self.__skip_name = re.compile(skip_name)
+        name = self._config.get_arg('name')
+        if name is not None:
+            self.__name = re.compile(name)
+        self._config.info("Parsing names")
+        self.__targets = [t for t in self.__targets if self.__right_name(t)]
+        self._config.debug("Parsed names, servers remaining: ")
+        [self._config.debug("   *** " + t.name) for t in self.__targets]
+
 
     def __right_age(self, target: Munch) -> bool:
         system_age = datetime.strptime(target.created, date_format)

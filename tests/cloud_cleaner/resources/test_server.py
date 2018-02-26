@@ -102,3 +102,15 @@ class ServerTest(TestCase):
         server.process()
         server.clean()
         shade.delete_server.assert_has_calls(calls, any_order=True)
+
+    def test_delete_server_by_name(self):
+        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
+                                          "server", "--name", "test-.*"])
+        config.get_shade = Mock(return_value=shade)
+        calls = [call('1'), call('2'), call('3')]
+        server = Server(now=current_time)
+        server.register(config)
+        config.parse_args()
+        server.process()
+        server.clean()
+        shade.delete_server.assert_has_calls(calls, any_order=True)
