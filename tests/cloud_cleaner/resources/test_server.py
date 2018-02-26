@@ -72,6 +72,17 @@ shade.delete_server = Mock()
 
 
 class ServerTest(TestCase):
+    def __test_with_call_order(self, args, calls):
+        config = CloudCleanerConfig(args=args)
+        config.get_shade = Mock(return_value=shade)
+        calls = [call(c) for c in calls]
+        server = Server(now=current_time)
+        server.register(config)
+        config.parse_args()
+        server.process()
+        server.clean()
+        shade.delete_server.assert_has_calls(calls, any_order=True)
+
     def test_init_with_name(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
@@ -92,25 +103,18 @@ class ServerTest(TestCase):
         self.assertEqual(Server.type_name, config.get_resource())
 
     def test_delete_3_day_old_servers(self):
-        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
-                                          "server", "--age", "3d"])
-        config.get_shade = Mock(return_value=shade)
-        calls = [call('3'), call('4'), call('5'), call('6')]
-        server = Server(now=current_time)
-        server.register(config)
-        config.parse_args()
-        server.process()
-        server.clean()
-        shade.delete_server.assert_has_calls(calls, any_order=True)
+        args = ["--os-auth-url", "http://no.com", "server", "--age", "3d"]
+        calls = ['3', '4', '5', '6']
+        self.__test_with_call_order(args, calls)
 
     def test_delete_server_by_name(self):
-        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
-                                          "server", "--name", "test-.*"])
-        config.get_shade = Mock(return_value=shade)
-        calls = [call('1'), call('2'), call('3')]
-        server = Server(now=current_time)
-        server.register(config)
-        config.parse_args()
-        server.process()
-        server.clean()
-        shade.delete_server.assert_has_calls(calls, any_order=True)
+        args = ["--os-auth-url", "http://no.com", "server", "--name",
+                "test-.*"]
+        calls = ['1', '2', '3']
+        self.__test_with_call_order(args, calls)
+
+    def test_name_and_age(self):
+        args = ["--os-auth-url", "http://no.com", "server", "--age", "3d",
+                "--skip-name", "pet-.*"]
+        calls = ['3', '4', '5']
+        self.__test_with_call_order(args, calls)
