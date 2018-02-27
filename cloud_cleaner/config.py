@@ -81,16 +81,12 @@ class CloudCleanerConfig(object):
         if debug >= 2:
             self.__log.setLevel(logging.DEBUG)
             self.__log.info("Setting logging level to debug")
-        try:
-            self.info("Getting cloud connection")
-            self.debug("Parsing cloud connection information")
-            cloud = self.__cloud_config.get_one_cloud(argparse=results)
-            self.__cloud = cloud
-            self.debug("Constructing shade client")
-            self.__shade = OpenStackCloud(self.__cloud)
-        except KeyboardInterrupt:
-            # No cloud was specified on the command line
-            self.__cloud = None
+        self.info("Getting cloud connection")
+        self.debug("Parsing cloud connection information")
+        cloud = self.__cloud_config.get_one_cloud(argparse=results)
+        self.__cloud = cloud
+        self.debug("Constructing shade client")
+        self.__shade = OpenStackCloud(self.__cloud)
         return results
 
     def get_arg(self, name: str) -> any:
