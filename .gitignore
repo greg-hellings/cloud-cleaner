@@ -7,3 +7,5 @@
 .coverage
 htmlcov
 .cache
+build
+dist
