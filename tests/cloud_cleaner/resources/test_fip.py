@@ -86,6 +86,10 @@ class TestFip(TestCase):
                                                          "httpp://no.com",
                                                          Fip.type_name])
         fip = Fip()
+        # If config hasn't yet been registered, then there will be an error
+        # from within this method, as intended
+        with self.assertRaises(AttributeError):
+            fip.process()
         fip.register(config)
         config.parse_args()
         self.assertEqual(Fip.type_name, config.get_resource())
