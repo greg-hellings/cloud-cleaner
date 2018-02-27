@@ -65,14 +65,13 @@ sample_servers = [
         'updated': '2018-01-01T02:07:34Z',
     })
 ]
-# setup mocks
-shade = Mock()
-shade.list_servers = Mock(return_value=sample_servers)
-shade.delete_server = Mock()
 
 
 class ServerTest(TestCase):
     def __test_with_call_order(self, args, calls):
+        shade = Mock()
+        shade.list_servers = Mock(return_value=sample_servers)
+        shade.delete_server = Mock()
         config = CloudCleanerConfig(args=args)
         config.get_shade = Mock(return_value=shade)
         calls = [call(c) for c in calls]
@@ -81,7 +80,7 @@ class ServerTest(TestCase):
         config.parse_args()
         server.process()
         server.clean()
-        shade.delete_server.assert_has_calls(calls, any_order=True)
+        self.assertEqual(shade.delete_server.call_args_list, calls)
 
     def test_init_with_name(self):
         parser = ArgumentParser()

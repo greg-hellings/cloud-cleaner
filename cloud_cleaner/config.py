@@ -100,7 +100,9 @@ class CloudCleanerConfig(object):
         :param name: The command line argument that is requested
         :return: The value of the name requested from
         """
-        return self.__options[name]
+        if name in self.__options.keys():
+            return self.__options[name]
+        return None
 
     def get_resource(self) -> str:
         """
