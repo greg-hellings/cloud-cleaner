@@ -26,5 +26,7 @@ class TestEntrypoint(TestCase):
 
     def test_resource_type(self):
         all_resources["server"].process = Mock()
-        cloud_clean(args=["--os-auth-url", "http://no.com", "server"])
-        self.assertEqual(1, len(all_resources["server"].process.mock_calls))
+        all_resources["server"].clean = Mock()
+        cloud_clean(args=["--os-auth-url", "http://no.com", "-f", "server"])
+        all_resources["server"].process.assert_called_once()
+        all_resources["server"].clean.assert_called_once()
