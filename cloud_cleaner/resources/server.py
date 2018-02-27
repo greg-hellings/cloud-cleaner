@@ -1,18 +1,23 @@
-from cloud_cleaner.config import CloudCleanerConfig, date_format
-from cloud_cleaner.resources.resource import Resource
-from cloud_cleaner.string_matcher import StringMatcher
+"""Contains implementation of the Server class"""
+import re
 from datetime import datetime, timezone
 from munch import Munch
-
-import re
+from cloud_cleaner.config import CloudCleanerConfig, DATE_FORMAT
+from cloud_cleaner.resources.resource import Resource
+from cloud_cleaner.string_matcher import StringMatcher
 
 
 class Server(Resource):
+    """
+    Performs processing and cleansing of instances of servers from the
+    configured OpenStack endpoints
+    """
     type_name = "server"
 
     def __init__(self, *args, **kwargs):
         super(Server, self).__init__(*args, **kwargs)
         self.__targets = []
+        self._interval = None
         # Default objects that pass through all instances without filtering
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
@@ -42,8 +47,8 @@ class Server(Resource):
         self._config.info("Connecting to OpenStack to retrieve server list")
         self.__targets = shade.list_servers()
         self._config.debug("Found servers: ")
-        for t in self.__targets:
-            self._config.debug("   *** " + t.name)
+        for target in self.__targets:
+            self._config.debug("   *** " + target.name)
         # Process for time
         self.__process_dates()
         # Process for name
@@ -74,8 +79,8 @@ class Server(Resource):
             self._config.debug("Working with age %s" % (self._interval,))
             self.__targets = list(filter(self.__right_age, self.__targets))
             self._config.debug("Parsed ages, servers remaining: ")
-            for t in self.__targets:
-                self._config.debug("   *** " + t.name)
+            for target in self.__targets:
+                self._config.debug("   *** " + target.name)
         else:
             self._config.info("No age provided")
 
@@ -90,8 +95,8 @@ class Server(Resource):
             self._config.info("Parsing names")
             self.__targets = list(filter(self.__right_name, self.__targets))
             self._config.debug("Parsed names, servers remaining: ")
-            for t in self.__targets:
-                self._config.debug("   *** " + t.name)
+            for target in self.__targets:
+                self._config.debug("   *** " + target.name)
         else:
             self._config.info("No name restrictions provided")
 
@@ -100,6 +105,6 @@ class Server(Resource):
                self.__name.match(target.name)
 
     def __right_age(self, target: Munch) -> bool:
-        system_age = datetime.strptime(target.created, date_format)
+        system_age = datetime.strptime(target.created, DATE_FORMAT)
         system_age = system_age.replace(tzinfo=timezone.utc)
         return self._now > (system_age + self._interval)

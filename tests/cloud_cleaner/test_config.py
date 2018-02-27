@@ -1,8 +1,8 @@
 from unittest import TestCase
-from cloud_cleaner.config import CloudCleanerConfig
 from argparse import ArgumentParser
 from logging import getLogger, WARNING, INFO, DEBUG
 from shade import OpenStackCloud
+from cloud_cleaner.config import CloudCleanerConfig
 
 
 class TestConfig(TestCase):

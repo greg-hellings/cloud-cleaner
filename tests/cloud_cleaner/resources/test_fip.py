@@ -7,7 +7,7 @@ from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources.fip import Fip
 
 
-floating_ips = [
+FLOATING_IPS = [
     # THESE ARE ATTACHED, AND SHOULDN'T BE DELETED, BY DEFAULT
     munchify({
         'attached': True,
@@ -58,7 +58,7 @@ floating_ips = [
 class TestFip(TestCase):
     def __test_with_calls(self, args, calls):
         shade = Mock()
-        shade.list_floating_ips = Mock(return_value=floating_ips)
+        shade.list_floating_ips = Mock(return_value=FLOATING_IPS)
         shade.delete_floating_ip = Mock()
         calls = [call(i) for i in calls]
         config = CloudCleanerConfig(args=args)
@@ -70,7 +70,7 @@ class TestFip(TestCase):
         fip.clean()
         self.assertEqual(shade.delete_floating_ip.call_args_list, calls)
 
-    def test_resource_type(self):
+    def test_resource_type(self):  # pylint: disable=no-self-use
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=["--os-auth-url",
                                                          "http://no.com",

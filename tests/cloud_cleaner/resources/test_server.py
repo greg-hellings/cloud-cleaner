@@ -1,15 +1,15 @@
+from argparse import ArgumentParser
 from unittest import TestCase
 from unittest.mock import Mock, call
-from cloud_cleaner.config import CloudCleanerConfig, date_format
-from cloud_cleaner.resources import Server
-from argparse import ArgumentParser
-from munch import munchify
 from datetime import datetime, timezone
+from munch import munchify
+from cloud_cleaner.config import CloudCleanerConfig, DATE_FORMAT
+from cloud_cleaner.resources import Server
 
 
-current_time = datetime.strptime('2018-02-23T16:00:00Z', date_format)
-current_time = current_time.replace(tzinfo=timezone.utc)
-sample_servers = [
+CURRENT_TIME = datetime.strptime('2018-02-23T16:00:00Z', DATE_FORMAT)
+CURRENT_TIME = CURRENT_TIME.replace(tzinfo=timezone.utc)
+SAMPLE_SERVERS = [
     # Server still being built out by OpenStack, should remain
     munchify({
         'id':  '1',
@@ -70,19 +70,19 @@ sample_servers = [
 class ServerTest(TestCase):
     def __test_with_call_order(self, args, calls):
         shade = Mock()
-        shade.list_servers = Mock(return_value=sample_servers)
+        shade.list_servers = Mock(return_value=SAMPLE_SERVERS)
         shade.delete_server = Mock()
         config = CloudCleanerConfig(args=args)
         config.get_shade = Mock(return_value=shade)
         calls = [call(c) for c in calls]
-        server = Server(now=current_time)
+        server = Server(now=CURRENT_TIME)
         server.register(config)
         config.parse_args()
         server.process()
         server.clean()
         self.assertEqual(shade.delete_server.call_args_list, calls)
 
-    def test_init_with_name(self):
+    def test_init_with_name(self):  # pylint: disable=no-self-use
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
         config.add_subparser = Mock()

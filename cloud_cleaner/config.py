@@ -1,18 +1,26 @@
+"""
+Contains CloudCleanerConfig for configuring the CLI options in this program
+"""
+import logging
+import sys
 from argparse import ArgumentParser, _SubParsersAction
+import os_client_config
 from shade import OpenStackCloud
 
-import logging
-import os_client_config
-import sys
+
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
-date_format = '%Y-%m-%dT%H:%M:%SZ'
-
-
-class CloudCleanerConfig(object):
+class CloudCleanerConfig(object):  # pylint: disable=R0902
+    """
+    Contains config options for the entirety of this program, handles setting
+    and parsing the global config options related to OpenStack. And also
+    provides convenient interfaces for Resource type definitions to define
+    their own sub-options and fetch back their parsed values.
+    """
     def __init__(self,
-                 parser: ArgumentParser=None,
-                 args: list=None):
+                 parser: ArgumentParser = None,
+                 args: list = None):
         if parser is None:
             parser = ArgumentParser()
         if args is None:
@@ -130,10 +138,13 @@ class CloudCleanerConfig(object):
 
     # LOGGING FUNCTIONS
     def info(self, msg, *args):
+        """Log at the info level"""
         self.__log.info(msg, *args)
 
     def debug(self, msg, *args):
+        """Log at the debug level"""
         self.__log.debug(msg, *args)
 
     def warning(self, msg, *args):
+        """Log at the warning level"""
         self.__log.warning(msg, *args)

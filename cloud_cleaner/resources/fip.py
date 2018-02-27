@@ -1,10 +1,17 @@
+"""
+Contains the Fip class to process arguments for and results from floating
+IP addresses
+"""
+from ipaddress import ip_address, ip_network
 from cloud_cleaner.resources.resource import Resource
 from cloud_cleaner.config import CloudCleanerConfig
-from ipaddress import ip_address, ip_network
-from munch import Munch
 
 
 class Fip(Resource):
+    """
+    Performs processing and cleansing of floating IP addresses from the
+    configured OpenStack endpoint.
+    """
     type_name = "fip"
 
     def __init__(self):
@@ -53,20 +60,28 @@ class Fip(Resource):
         # should be handled by the below code, but it currently is not.
         #
         # Define functions to do the filtering
-        def filter_factory(field: str, network: str):
-            net = ip_network(network)
-
-            def filter(type: Munch) -> bool:
-                ip = ip_address(type[field])
-                return ip in net
-            return filter
         floating_subnet = self._config.get_arg('floating_subnet')
         if floating_subnet is not None:
-            self.__fips = filter(filter_factory('floating_ip_address',
-                                                floating_subnet),
+            self.__fips = filter(self.__filter_factory('floating_ip_address',
+                                                       floating_subnet),
                                  self.__fips)
         static_subnet = self._config.get_arg('static_subnet')
         if static_subnet is not None:
-            self.__fips = filter(filter_factory('fixed_ip_address',
-                                                static_subnet),
+            self.__fips = filter(self.__filter_factory('fixed_ip_address',
+                                                       static_subnet),
                                  self.__fips)
+
+    @classmethod
+    def __filter_factory(cls,
+                         field: str,
+                         network: str):
+        """
+        Creates and returns a function that can be used as the basis of
+        filtering IP addresses based on user input netmasks
+
+        :param field: Name of the API field to test
+        :param network: Netmask to test an address is in
+        :return: Function to perform the network testing
+        """
+        net = ip_network(network)
+        return lambda x: ip_address(x[field]) in net
