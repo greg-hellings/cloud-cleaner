@@ -52,6 +52,11 @@ class Resource(object):
             return int(match.group(1))
         return 0
 
+    def _get_shade(self):
+        if self._config is None:
+            return None
+        return self._config.get_shade()
+
 
 class UnimplementedError(Exception):
     def __init__(self, msg: str):

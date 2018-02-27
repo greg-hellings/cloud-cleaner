@@ -12,7 +12,6 @@ class Server(Resource):
 
     def __init__(self, *args, **kwargs):
         super(Server, self).__init__(*args, **kwargs)
-        self.__shade = None
         self.__targets = []
         # Default objects that pass through all instances without filtering
         self.__skip_name = StringMatcher(False)
@@ -39,10 +38,9 @@ class Server(Resource):
 
         :return: None
         """
-        if self.__shade is None:
-            self.__shade = self._config.get_shade()
+        shade = self._get_shade()
         self._config.info("Connecting to OpenStack to retrieve server list")
-        self.__targets = self.__shade.list_servers()
+        self.__targets = shade.list_servers()
         self._config.debug("Found servers: ")
         for t in self.__targets:
             self._config.debug("   *** " + t.name)
@@ -58,10 +56,9 @@ class Server(Resource):
 
         :return: None
         """
-        if self.__shade is None:
-            self.__shade = self._config.get_shade()
+        shade = self._get_shade()
         for target in self.__targets:
-            self.__shade.delete_server(target.id)
+            shade.delete_server(target.id)
 
     def __process_dates(self):
         """

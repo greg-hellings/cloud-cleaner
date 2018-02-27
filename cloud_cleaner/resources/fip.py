@@ -33,20 +33,15 @@ class Fip(Resource):
                                       help=_desc)
 
     def process(self):
-        shade = self.__get_shade()
+        shade = self._get_shade()
         self.__fips = shade.list_floating_ips()
         self.__filter_attached()
         self.__filter_by_address()
 
     def clean(self):
-        shade = self.__get_shade()
+        shade = self._get_shade()
         for fip in self.__fips:
             shade.delete_floating_ip(fip.id)
-
-    def __get_shade(self):
-        if self._config is None:
-            return None
-        return self._config.get_shade()
 
     def __filter_attached(self):
         force_attached = self._config.get_arg('with_attached')
