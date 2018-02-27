@@ -27,7 +27,8 @@ class CloudCleanerConfig(object):
         self.__parser.add_argument("--force", "-f",
                                    help=_help,
                                    action='store_true')
-        _help = "Verbosity level. Add more times for more output (up to 2 times)"
+        _help = "Verbosity level. Add more times for more output "\
+                "(up to 2 times)"
         self.__parser.add_argument("-v", "--verbose", help=_help,
                                    action='count', default=0)
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")

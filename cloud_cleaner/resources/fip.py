@@ -1,8 +1,6 @@
 from cloud_cleaner.resources.resource import Resource
 from cloud_cleaner.config import CloudCleanerConfig
-from ipaddress import IPv4Address, IPv4Network, \
-    IPv6Address, IPv6Network, \
-    ip_address, ip_network
+from ipaddress import ip_address, ip_network
 from munch import Munch
 
 

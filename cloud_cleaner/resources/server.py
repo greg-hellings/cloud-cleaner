@@ -74,7 +74,8 @@ class Server(Resource):
             self._config.debug("Working with age %s" % (self._interval,))
             self.__targets = list(filter(self.__right_age, self.__targets))
             self._config.debug("Parsed ages, servers remaining: ")
-            for t in self.__targets: self._config.debug("   *** " + t.name)
+            for t in self.__targets:
+                self._config.debug("   *** " + t.name)
         else:
             self._config.info("No age provided")
 
@@ -89,7 +90,8 @@ class Server(Resource):
             self._config.info("Parsing names")
             self.__targets = list(filter(self.__right_name, self.__targets))
             self._config.debug("Parsed names, servers remaining: ")
-            for t in self.__targets: self._config.debug("   *** " + t.name)
+            for t in self.__targets:
+                self._config.debug("   *** " + t.name)
         else:
             self._config.info("No name restrictions provided")
 
