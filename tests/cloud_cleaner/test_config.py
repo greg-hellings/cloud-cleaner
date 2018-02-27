@@ -1,6 +1,7 @@
 from unittest import TestCase
 from cloud_cleaner.config import CloudCleanerConfig
 from argparse import ArgumentParser
+from logging import getLogger, WARNING, INFO, DEBUG
 
 
 class TestConfig(TestCase):
@@ -11,6 +12,8 @@ class TestConfig(TestCase):
         config.set_args(["--os-auth-url", "http://no.com", "item"])
         config.parse_args()
         self.assertEqual("item", config.get_resource())
+        log = getLogger("cloud_cleaner")
+        self.assertEqual(log.getEffectiveLevel(), WARNING)
 
     def test_subcommand_incorrect(self):
         parser = ArgumentParser()
@@ -24,3 +27,17 @@ class TestConfig(TestCase):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
         self.assertIsNone(config.get_cloud())
+
+    def test_verbose_one(self):
+        args = ["--os-auth-url", "http://no.com", "-v"]
+        config = CloudCleanerConfig(args=args)
+        config.parse_args()
+        log = getLogger("cloud_cleaner")
+        self.assertEqual(log.getEffectiveLevel(), INFO)
+
+    def test_verbose_two(self):
+        args = ["--os-auth-url", "http://no.com", "-vv"]
+        config = CloudCleanerConfig(args=args)
+        config.parse_args()
+        log = getLogger("cloud_cleaner")
+        self.assertEqual(log.getEffectiveLevel(), DEBUG)
