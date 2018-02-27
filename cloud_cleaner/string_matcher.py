@@ -8,6 +8,3 @@ class StringMatcher(object):
 
     def match(self, *args) -> bool:
         return self.__value
-
-    def fullmatch(self, *args) -> bool:
-        return self.__value
