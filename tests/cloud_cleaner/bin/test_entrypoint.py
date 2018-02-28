@@ -5,8 +5,9 @@ try:
 except ImportError:
     from mock import Mock
 from argparse import ArgumentParser
-
+from keystoneauth1.exceptions import MissingRequiredOptions
 from cloud_cleaner.bin.entrypoint import cloud_clean
+from cloud_cleaner import config as config_module
 from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import ALL_RESOURCES
 
@@ -14,10 +15,11 @@ from cloud_cleaner.resources import ALL_RESOURCES
 class TestEntrypoint(TestCase):
     def test_cloud_cleaner_noopts(self):
         parser = ArgumentParser()
-        config = CloudCleanerConfig(parser=parser, args=[])
+        config_module.DEFAULT_ARGUMENTS = []
+        config = CloudCleanerConfig(parser=parser)
         if version_info.major == 3:
             # Raised because no resource
-            with self.assertRaises(KeyError):
+            with self.assertRaises(MissingRequiredOptions):
                 cloud_clean([], config)
         else:
             with self.assertRaises(SystemExit):
