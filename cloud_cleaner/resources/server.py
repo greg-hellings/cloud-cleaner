@@ -46,13 +46,18 @@ class Server(Resource):
         shade = self._get_shade()
         self._config.info("Connecting to OpenStack to retrieve server list")
         self.__targets = shade.list_servers()
-        self._config.debug("Found servers: ")
-        for target in self.__targets:
-            self._config.debug("   *** " + target.name)
+        self._config.info("Found %d servers" % len(self.__targets))
+        self.__debug_targets()
         # Process for time
         self.__process_dates()
+        self._config.info("%d servers passed age test" % len(self.__targets))
         # Process for name
         self.__process_names()
+        self._config.info("%d servers passed name test" % len(self.__targets))
+
+    def __debug_targets(self):
+        for target in self.__targets:
+            self._config.debug("   *** " + target.name)
 
     def clean(self):
         """
@@ -62,8 +67,11 @@ class Server(Resource):
         :return: None
         """
         shade = self._get_shade()
+        self._config.info("Deleting %d servers" % len(self.__targets))
         for target in self.__targets:
+            self._config.debug("Deleting %s" % target.id)
             shade.delete_server(target.id)
+            print("Deleted %s" % target.name)
 
     def __process_dates(self):
         """
@@ -74,15 +82,14 @@ class Server(Resource):
         """
         age = self._config.get_arg('age')
         if age is not None:
-            self._config.info("Parsing dates")
+            self._config.debug("Parsing dates")
             self._interval = self.parse_interval(self._config.get_arg('age'))
             self._config.debug("Working with age %s" % (self._interval,))
             self.__targets = list(filter(self.__right_age, self.__targets))
             self._config.debug("Parsed ages, servers remaining: ")
-            for target in self.__targets:
-                self._config.debug("   *** " + target.name)
+            self.__debug_targets()
         else:
-            self._config.info("No age provided")
+            self._config.debug("No age provided")
 
     def __process_names(self):
         skip_name = self._config.get_arg("skip_name")
@@ -92,13 +99,12 @@ class Server(Resource):
         if name is not None:
             self.__name = re.compile(name)
         if name is not None or skip_name is not None:
-            self._config.info("Parsing names")
+            self._config.debug("Parsing names")
             self.__targets = list(filter(self.__right_name, self.__targets))
             self._config.debug("Parsed names, servers remaining: ")
-            for target in self.__targets:
-                self._config.debug("   *** " + target.name)
+            self.__debug_targets()
         else:
-            self._config.info("No name restrictions provided")
+            self._config.debug("No name restrictions provided")
 
     def __right_name(self, target):
         return not self.__skip_name.match(target.name) and \

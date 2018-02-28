@@ -140,12 +140,12 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
     # LOGGING FUNCTIONS
     def info(self, msg, *args):
         """Log at the info level"""
-        self.__log.info(msg, *args)
+        self.__log.info("INFO: %s" % msg, *args)
 
     def debug(self, msg, *args):
         """Log at the debug level"""
-        self.__log.debug(msg, *args)
+        self.__log.debug("DEBUG: %s" % msg, *args)
 
     def warning(self, msg, *args):
         """Log at the warning level"""
-        self.__log.warning(msg, *args)
+        self.__log.warning("WARN: %s" % msg, *args)

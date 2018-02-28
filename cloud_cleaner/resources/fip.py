@@ -38,9 +38,14 @@ class Fip(Resource):
 
     def process(self):
         shade = self._get_shade()
+        self._config.info("Connecting to OpenStack to fetch floating IPs")
         self.__fips = shade.list_floating_ips()
+        self._config.info("Found %d floating IPs" % len(self.__fips))
+        self.__debug_fips()
         self.__filter_attached()
         self.__filter_by_address()
+        self._config.info("%d floating IPs passed address test" %
+                          len(self.__fips))
 
     def clean(self):
         shade = self._get_shade()
@@ -50,7 +55,10 @@ class Fip(Resource):
     def __filter_attached(self):
         force_attached = self._config.get_arg('with_attached')
         if not force_attached:
-            self.__fips = filter(lambda f: not f.attached, self.__fips)
+            self.__fips = list(filter(lambda f: not f.attached, self.__fips))
+            self._config.info("%d floating IPs passed attached test" %
+                              len(self.__fips))
+            self.__debug_fips()
 
     def __filter_by_address(self):
         # TODO: Properly wrap conditions where there is an IPv4/6 mismatch
@@ -61,14 +69,24 @@ class Fip(Resource):
         # Define functions to do the filtering
         floating_subnet = self._config.get_arg('floating_subnet')
         if floating_subnet is not None:
-            self.__fips = filter(self.__filter_factory('floating_ip_address',
-                                                       floating_subnet),
-                                 self.__fips)
+            __fips = filter(self.__filter_factory('floating_ip_address',
+                                                  floating_subnet),
+                            self.__fips)
+            self.__fips = list(__fips)
+            self._config.info("%d passed floating_subnet" % len(self.__fips))
+            self.__debug_fips()
         static_subnet = self._config.get_arg('static_subnet')
         if static_subnet is not None:
-            self.__fips = filter(self.__filter_factory('fixed_ip_address',
-                                                       static_subnet),
-                                 self.__fips)
+            __fips = filter(self.__filter_factory('fixed_ip_address',
+                                                  static_subnet),
+                            self.__fips)
+            self.__fips = list(__fips)
+            self._config.info("%d passed static_subnet" % len(self.__fips))
+            self.__debug_fips()
+
+    def __debug_fips(self):
+        for fip in self.__fips:
+            self._config.debug(fip.floating_ip_address)
 
     @classmethod
     def __filter_factory(cls, field, network):
