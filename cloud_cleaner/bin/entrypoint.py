@@ -6,8 +6,8 @@ from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import ALL_RESOURCES
 
 
-def cloud_clean(args: list = sys.argv[1:],  # pylint: disable=W0102
-                config: CloudCleanerConfig = None):
+def cloud_clean(args=sys.argv[1:],  # pylint: disable=W0102
+                config=None):
     """
     Entrypoint for the cloud-clean CLI interface
 

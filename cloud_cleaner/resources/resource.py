@@ -1,7 +1,7 @@
 """Contains the Resource base class for CLI processing"""
 import re
-from datetime import datetime, timezone, timedelta
-from cloud_cleaner.config import CloudCleanerConfig
+from datetime import datetime, timedelta
+from pytz import utc
 
 
 HOUR = re.compile(r'(\d+)h')
@@ -38,9 +38,9 @@ class Resource(object):
         if 'now' in kwargs.keys():
             self._now = kwargs['now']
         else:
-            self._now = datetime.now(timezone.utc)
+            self._now = datetime.now(utc)
 
-    def register(self, config: CloudCleanerConfig):
+    def register(self, config):
         """
         Call to register options for this resource type with the provided
         config object.
@@ -72,7 +72,7 @@ class Resource(object):
         """
         raise UnimplementedError("Must override this method")
 
-    def parse_interval(self, interval: str) -> timedelta:
+    def parse_interval(self, interval):
         """
         Parse the given CLI argument interval into a usable timedelta type
         of object. This method understands suffixes for hours, days, weeks,
@@ -94,7 +94,7 @@ class Resource(object):
                          hours=hours)
 
     @classmethod
-    def __parse_interval(cls, regex, interval: str):
+    def __parse_interval(cls, regex, interval):
         match = regex.match(interval)
         if match:
             return int(match.group(1))

@@ -4,7 +4,6 @@ IP addresses
 """
 from ipaddress import ip_address, ip_network
 from cloud_cleaner.resources.resource import Resource
-from cloud_cleaner.config import CloudCleanerConfig
 
 
 class Fip(Resource):
@@ -18,7 +17,7 @@ class Fip(Resource):
         super(Fip, self).__init__()
         self.__fips = []
 
-    def register(self, config: CloudCleanerConfig):
+    def register(self, config):
         super(Fip, self).register(config)
         _desc = "By default, only FIPs not attached are considered. Include "\
                 "this flag to consider ALL fips"
@@ -72,9 +71,7 @@ class Fip(Resource):
                                  self.__fips)
 
     @classmethod
-    def __filter_factory(cls,
-                         field: str,
-                         network: str):
+    def __filter_factory(cls, field, network):
         """
         Creates and returns a function that can be used as the basis of
         filtering IP addresses based on user input netmasks

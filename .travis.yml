@@ -12,6 +12,8 @@ script:
 
 matrix:
   include:
+    - python: 2.7
+      env: TOXENV=py27
     - python: 3.3
       env: TOXENV=py33
     - python: 3.4
@@ -20,6 +22,9 @@ matrix:
       env: TOXENV=py35
     - python: 3.6
       env: TOXENV=py36
+
+    - python: pypy
+      env: TOXENV=pypy
     - python: pypy3.5
       env: TOXENV=pypy3
 
@@ -34,4 +39,4 @@ deploy:
   distributions: "sdist bdist_wheel"
   on:
     tags: true
-    condition: $TOXENV=py36
+    condition: $TOXENV = py36

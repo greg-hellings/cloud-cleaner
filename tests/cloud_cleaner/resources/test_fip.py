@@ -1,5 +1,8 @@
 from unittest import TestCase
-from unittest.mock import Mock, call
+try:
+    from unittest.mock import Mock, call
+except ImportError:
+    from mock import Mock, call
 from argparse import ArgumentParser
 from munch import munchify
 

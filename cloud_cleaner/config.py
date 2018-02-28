@@ -3,12 +3,13 @@ Contains CloudCleanerConfig for configuring the CLI options in this program
 """
 import logging
 import sys
-from argparse import ArgumentParser, _SubParsersAction
+from argparse import ArgumentParser
 import os_client_config
 from shade import OpenStackCloud
 
 
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+DEFAULT_ARGUMENTS = sys.argv
 
 
 class CloudCleanerConfig(object):  # pylint: disable=R0902
@@ -18,13 +19,11 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
     provides convenient interfaces for Resource type definitions to define
     their own sub-options and fetch back their parsed values.
     """
-    def __init__(self,
-                 parser: ArgumentParser = None,
-                 args: list = None):
+    def __init__(self, parser=None, args=None):
         if parser is None:
             parser = ArgumentParser()
         if args is None:
-            args = sys.argv
+            args = DEFAULT_ARGUMENTS
         self.__cloud_config = os_client_config.OpenStackConfig()
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
@@ -49,7 +48,7 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
         self.__log = logging.getLogger("cloud_cleaner")
         self.__log.addHandler(logging.StreamHandler())
 
-    def add_subparser(self, name: str) -> _SubParsersAction:
+    def add_subparser(self, name):
         """
         Creates a subparser to match the name given by the user.
         Returns it to caller
@@ -61,7 +60,7 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
         self.__sub_parser_set[name] = sub_parser
         return sub_parser
 
-    def set_args(self, args: list):
+    def set_args(self, args):
         """
         Sets args for the current execution, in case there are any args that
         might have been altered or removed from the set by the first call
@@ -72,7 +71,7 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
         self.__args = args
         return self
 
-    def parse_args(self) -> ArgumentParser:
+    def parse_args(self):
         """
         Parse all arguments currently attached to this config object
 
@@ -98,7 +97,7 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
         self.__shade = OpenStackCloud(self.__cloud)
         return results
 
-    def get_arg(self, name: str) -> any:
+    def get_arg(self, name):
         """
         Fetch the value of one of the command line arguments from the argparser
 
@@ -109,12 +108,14 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
             return self.__options[name]
         return None
 
-    def get_resource(self) -> str:
+    def get_resource(self):
         """
         Get the name of the resource that is being requested
 
         :return: The string name of the resource selected from the command line
         """
+        if self.__options is None:
+            return None
         return self.__options['resource']
 
     def get_cloud(self):
@@ -127,7 +128,7 @@ class CloudCleanerConfig(object):  # pylint: disable=R0902
         """
         return self.__cloud
 
-    def get_shade(self) -> OpenStackCloud:
+    def get_shade(self):
         """
         Fetch the shade object attached to the cloud that has been configured
         for this run.

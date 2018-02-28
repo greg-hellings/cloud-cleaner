@@ -1,5 +1,9 @@
+from sys import version_info
 from unittest import TestCase
-from unittest.mock import Mock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 from argparse import ArgumentParser
 
 from cloud_cleaner.bin.entrypoint import cloud_clean
@@ -11,8 +15,13 @@ class TestEntrypoint(TestCase):
     def test_cloud_cleaner_noopts(self):
         parser = ArgumentParser()
         config = CloudCleanerConfig(parser=parser, args=[])
-        with self.assertRaises(KeyError):
-            cloud_clean(["--os-auth-url", "http://no.com"], config)
+        if version_info.major == 3:
+            # Raised because no resource
+            with self.assertRaises(KeyError):
+                cloud_clean([], config)
+        else:
+            with self.assertRaises(SystemExit):
+                cloud_clean([], config)
         self.assertIsNone(config.get_resource())
 
     def test_cloud_cleaner_server(self):

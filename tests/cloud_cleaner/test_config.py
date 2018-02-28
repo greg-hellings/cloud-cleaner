@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from logging import getLogger, WARNING, INFO, DEBUG
 from shade import OpenStackCloud
 from cloud_cleaner.config import CloudCleanerConfig
+from cloud_cleaner.resources import ALL_RESOURCES
 
 
 class TestConfig(TestCase):
@@ -33,8 +34,9 @@ class TestConfig(TestCase):
         self.assertIsNone(config.get_cloud())
 
     def test_verbose_one(self):
-        args = ["--os-auth-url", "http://no.com", "-v"]
+        args = ["--os-auth-url", "http://no.com", "-v", "server"]
         config = CloudCleanerConfig(args=args)
+        ALL_RESOURCES["server"].register(config)
         config.parse_args()
         log = getLogger("cloud_cleaner")
         self.assertEqual(log.getEffectiveLevel(), INFO)
@@ -42,8 +44,9 @@ class TestConfig(TestCase):
         self.assertIsInstance(shade, OpenStackCloud)
 
     def test_verbose_two(self):
-        args = ["--os-auth-url", "http://no.com", "-vv"]
+        args = ["--os-auth-url", "http://no.com", "-vv", "server"]
         config = CloudCleanerConfig(args=args)
+        ALL_RESOURCES["server"].register(config)
         config.parse_args()
         log = getLogger("cloud_cleaner")
         self.assertEqual(log.getEffectiveLevel(), DEBUG)

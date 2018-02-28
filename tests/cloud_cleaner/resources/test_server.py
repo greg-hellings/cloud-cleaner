@@ -1,14 +1,18 @@
 from argparse import ArgumentParser
 from unittest import TestCase
-from unittest.mock import Mock, call
-from datetime import datetime, timezone
+try:
+    from unittest.mock import Mock, call
+except ImportError:
+    from mock import Mock, call
+from datetime import datetime
 from munch import munchify
+from pytz import utc
 from cloud_cleaner.config import CloudCleanerConfig, DATE_FORMAT
 from cloud_cleaner.resources import Server
 
 
 CURRENT_TIME = datetime.strptime('2018-02-23T16:00:00Z', DATE_FORMAT)
-CURRENT_TIME = CURRENT_TIME.replace(tzinfo=timezone.utc)
+CURRENT_TIME = CURRENT_TIME.replace(tzinfo=utc)
 SAMPLE_SERVERS = [
     # Server still being built out by OpenStack, should remain
     munchify({

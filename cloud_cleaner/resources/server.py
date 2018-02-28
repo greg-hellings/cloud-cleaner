@@ -1,8 +1,8 @@
 """Contains implementation of the Server class"""
 import re
-from datetime import datetime, timezone
-from munch import Munch
-from cloud_cleaner.config import CloudCleanerConfig, DATE_FORMAT
+from datetime import datetime
+from pytz import utc
+from cloud_cleaner.config import DATE_FORMAT
 from cloud_cleaner.resources.resource import Resource
 from cloud_cleaner.string_matcher import StringMatcher
 
@@ -22,7 +22,7 @@ class Server(Resource):
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
 
-    def register(self, config: CloudCleanerConfig):
+    def register(self, config):
         """
 
         :type parser: argparse.ArgumentParser
@@ -100,11 +100,11 @@ class Server(Resource):
         else:
             self._config.info("No name restrictions provided")
 
-    def __right_name(self, target: Munch) -> bool:
+    def __right_name(self, target):
         return not self.__skip_name.match(target.name) and \
                self.__name.match(target.name)
 
-    def __right_age(self, target: Munch) -> bool:
+    def __right_age(self, target):
         system_age = datetime.strptime(target.created, DATE_FORMAT)
-        system_age = system_age.replace(tzinfo=timezone.utc)
+        system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)

@@ -17,6 +17,8 @@ setup(
         'Operating System :: POSIX',
         'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
@@ -29,8 +31,14 @@ setup(
     install_requires=[
         'shade',
         'os-client-config',
-        'munch'
+        'munch',
+        'pytz'
     ],
+    extras_require={
+        ":python_version<'3.3'": [
+            "py2-ipaddress"
+        ]
+    },
     entry_points={
         'console_scripts': [
             'cloud-clean=cloud_cleaner.bin.entrypoint:cloud_clean'
