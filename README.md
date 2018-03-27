@@ -4,6 +4,18 @@ Current code coverage: [![codecov](https://codecov.io/gh/greg-hellings/cloud-cle
 
 Current PyPI Release: [![PyPI version](https://badge.fury.io/py/cloud-cleaner.svg)](https://badge.fury.io/py/cloud-cleaner)
 
+# Function
+
+Cloud Cleaner is a utility designed to cleanup left over resources in an OpenStack environment. Often, when an
+OpenStack tenant is used for testing and ephemeral host provisioning, artifacts can be left over from previous runs
+for a number of reasons. Perhaps a test run failed and did not include proper teardown procedures. Perhaps someone
+provisioned a test resource but forgot about it or left the team and never tore it down.
+
+Cloud Cleaner provides a way to specify that resources fitting certain criteria ought to be expunged from the
+tenant. This can help free up quota and limit the resources being utilized to only those that are actively necessary.
+The primary component needing to be freed up are VMs, as these are resource intensive to maintain and are difficult
+to reuse properly. Other resource types can be added to Cloud Cleaner as the need arises.
+
 # Installation
 
 Cloud Cleaner depends on several Python libraries, and supports Python versions 2.7 and 3.3+. The recommended way to
