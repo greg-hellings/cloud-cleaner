@@ -18,7 +18,7 @@ class Resource(object):
     things like dates and times and the like.
 
     Sub-classes should override the "type_name" field as well as the methods
-    "process" and "call", minimally. See those methods for more information
+    "process" and "clean", minimally. See those methods for more information
     on what they should do.
 
     "type_name" defines the specific CLI sub-command that will be processed
