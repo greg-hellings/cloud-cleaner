@@ -12,7 +12,7 @@ DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 DEFAULT_ARGUMENTS = sys.argv
 
 
-class CloudCleanerConfig(object):  # pylint: disable=R0902
+class CloudCleanerConfig():  # pylint: disable=R0902
     """
     Contains config options for the entirety of this program, handles setting
     and parsing the global config options related to OpenStack. And also

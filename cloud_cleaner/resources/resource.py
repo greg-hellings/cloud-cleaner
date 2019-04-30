@@ -11,7 +11,10 @@ MONTH = re.compile(r'(\d+)m')
 YEAR = re.compile(r'(\d+)y')
 
 
-class Resource(object):
+# PyLint disabled because removing the (object) call here causes errors in
+# python2.7. Once we drop support for that, we can then re-enable this lint
+# line
+class Resource(object):  # pylint: disable=R0205
     """
     Base class for all resources types. It handles basic registration of the
     type with a config object and a few simple helper methods for handling
@@ -108,4 +111,3 @@ class Resource(object):
 
 class UnimplementedError(Exception):
     """Error indicating called method needs to be overridden"""
-    pass

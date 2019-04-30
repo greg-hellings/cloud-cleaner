@@ -1,7 +1,7 @@
 """Filler class for regex comparisons"""
 
 
-class StringMatcher(object):  # pylint: disable=too-few-public-methods
+class StringMatcher():  # pylint: disable=too-few-public-methods
     """
     Used in place where a regex would otherwise be used, but where a constant
     return value is desired, instead.
