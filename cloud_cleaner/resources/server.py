@@ -132,12 +132,12 @@ class Server(Resource):
         return self._now > (system_age + self._interval)
 
     def __set_flagged(self):
-        '''
+        """
         Processes the txt file associated with the cloud to put all flagged
         servers into the __flagged field.
 
         :return: None
-        '''
+        """
         self.__flagged = []
         conn = self._get_conn()
         # List of server names that have been flagged to possibly be deleted
@@ -155,10 +155,10 @@ class Server(Resource):
         reader.close()
 
     def write_to_flagged(self):
-        '''
+        """
         Writes the names of flagged servers to the correct _flagged.txt file,
         then sends emails if the flag is set in emails.json.
-        '''
+        """
         conn = self._get_conn()
         writer = open(conn.name + "_flagged", 'w')
         flag_log = ""
@@ -172,12 +172,12 @@ class Server(Resource):
             self.send_emails()
 
     def send_emails(self):
-        '''
+        """
         Sends warning emails to the owners of all flagged servers, if they have
         an email to send to. Email settings depend on input args to the script.
 
         :return: None
-        '''
+        """
         emails = self._config.get_emails()
         sender = emails["Sender"]
         smtp_name = emails["smtp_server"]

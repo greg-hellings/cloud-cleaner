@@ -139,11 +139,23 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         return self.__conn
 
     def __set_emails(self):
+        """
+        Opens email.json and turns its data into a dictionary, returning the
+        json information in the form of a dictionary.
+
+        :return: The dictionary
+        """
         with open("email.json", "r") as reader:
             data = json.load(reader)
         return data
 
     def get_emails(self):
+        """
+        Get the dictionary holding the email configuration options
+
+        :return: The dictionary
+
+        """
         return self.__emails
 
     # LOGGING FUNCTIONS
