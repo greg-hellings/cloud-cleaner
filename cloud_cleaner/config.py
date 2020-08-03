@@ -4,11 +4,10 @@ Contains CloudCleanerConfig for configuring the CLI options in this program
 import logging
 import sys
 from argparse import ArgumentParser
-import os_client_config
-from shade import OpenStackCloud
+import openstack
+import json
 
-
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DEFAULT_ARGUMENTS = sys.argv
 
 
@@ -24,7 +23,7 @@ class CloudCleanerConfig():  # pylint: disable=R0902
             parser = ArgumentParser()
         if args is None:
             args = DEFAULT_ARGUMENTS
-        self.__cloud_config = os_client_config.OpenStackConfig()
+        self.__cloud_config = openstack.config.OpenStackConfig()
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
         # Register global options
@@ -41,10 +40,11 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args
+        self.__emails = self.__set_emails()
         # Defined after options are parsed
         self.__options = None
         self.__cloud = None
-        self.__shade = None
+        self.__conn = None
         self.__log = logging.getLogger("cloud_cleaner")
         self.__log.addHandler(logging.StreamHandler())
 
@@ -94,7 +94,8 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         cloud = self.__cloud_config.get_one_cloud(argparse=results)
         self.__cloud = cloud
         self.debug("Constructing shade client")
-        self.__shade = OpenStackCloud(self.__cloud)
+        conn = openstack.connection.from_config(config=self.__cloud)
+        self.__conn = conn
         return results
 
     def get_arg(self, name):
@@ -128,14 +129,22 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         """
         return self.__cloud
 
-    def get_shade(self):
+    def get_conn(self):
         """
-        Fetch the shade object attached to the cloud that has been configured
-        for this run.
+        Fetch the connection object attached to the cloud that has been
+        configured for this run.
 
-        :return: The shade object
+        :return: The connection object
         """
-        return self.__shade
+        return self.__conn
+
+    def __set_emails(self):
+        with open("email.json", "r") as reader:
+            data = json.load(reader)
+        return data
+
+    def get_emails(self):
+        return self.__emails
 
     # LOGGING FUNCTIONS
     def info(self, msg, *args):

@@ -57,7 +57,7 @@ class Resource(object):  # pylint: disable=R0205
         self._config = config
         self._sub_config = config.add_subparser(self.type_name)
 
-    def process(self):  # pylint: disable=no-self-use
+    def process(self, deletion):  # pylint: disable=no-self-use
         """
         Override this method in base classes in order to perform the actual
         calls to OpenStack to fetch and filter the processed resources
@@ -103,10 +103,10 @@ class Resource(object):  # pylint: disable=R0205
             return int(match.group(1))
         return 0
 
-    def _get_shade(self):
+    def _get_conn(self):
         if self._config is None:
             return None
-        return self._config.get_shade()
+        return self._config.get_conn()
 
 
 class UnimplementedError(Exception):

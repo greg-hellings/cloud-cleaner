@@ -1,5 +1,6 @@
 """Contains implementation of the Server class"""
 import re
+import smtplib
 from datetime import datetime
 from pytz import utc
 from cloud_cleaner.config import DATE_FORMAT
@@ -22,6 +23,9 @@ class Server(Resource):
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
 
+        self.__flagged = []
+        self.__deleted_ids = []
+
     def register(self, config):
         """
 
@@ -36,16 +40,26 @@ class Server(Resource):
         _desc = "Minimum age (1d, 2w, 6m, 1y)"
         self._sub_config.add_argument("--age", "-a", help=_desc)
 
-    def process(self):
+    def process(self, deletion):
         """
         Fetches the list of servers and processes them to filter out which
         ones ought to actually be deleted.
 
         :return: None
         """
-        shade = self._get_shade()
+        conn = self._get_conn()
         self._config.info("Connecting to OpenStack to retrieve server list")
-        self.__targets = shade.list_servers()
+        if(deletion):
+            # We only wish to look at servers which have been flagged
+            self.__set_flagged()
+            self.__targets = self.__flagged
+        else:
+            server_accum = []
+            # We only want to look over servers which have not been deleted
+            for server in conn.list_servers():
+                if server.id not in self.__deleted_ids:
+                    server_accum.append(server)
+            self.__targets = server_accum
         self._config.info("Found %d servers" % len(self.__targets))
         self.__debug_targets()
         # Process for time
@@ -54,6 +68,7 @@ class Server(Resource):
         # Process for name
         self.__process_names()
         self._config.info("%d servers passed name test" % len(self.__targets))
+        self.__flagged = []
 
     def __debug_targets(self):
         for target in self.__targets:
@@ -66,11 +81,12 @@ class Server(Resource):
 
         :return: None
         """
-        shade = self._get_shade()
+        conn = self._get_conn()
         self._config.info("Deleting %d servers" % len(self.__targets))
         for target in self.__targets:
             self._config.debug("Deleting %s" % target.id)
-            shade.delete_server(target.id)
+            self.__deleted_ids.append(target.id)
+            conn.delete_server(target.id)
             print("Deleted %s" % target.name)
 
     def __process_dates(self):
@@ -111,6 +127,73 @@ class Server(Resource):
                self.__name.match(target.name)
 
     def __right_age(self, target):
-        system_age = datetime.strptime(target.created, DATE_FORMAT)
+        system_age = datetime.strptime(target.launched_at, DATE_FORMAT)
         system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)
+
+    def __set_flagged(self):
+        '''
+        Processes the txt file associated with the cloud to put all flagged
+        servers into the __flagged field.
+
+        :return: None
+        '''
+        self.__flagged = []
+        conn = self._get_conn()
+        # List of server names that have been flagged to possibly be deleted
+        delete_list = []
+        # Open reader for the flagged file
+        reader = open(conn.name + "_flagged", 'r+')
+        for line in reader:
+            # delete the newline character at the end of the line
+            delete_list.append(line[:-1])
+
+        for name in delete_list:
+            server = conn.get_server(name)
+            self.__flagged.append(server)
+        reader.write("")
+        reader.close()
+
+    def write_to_flagged(self):
+        '''
+        Writes the names of flagged servers to the correct _flagged.txt file,
+        then sends emails if the flag is set in emails.json.
+        '''
+        conn = self._get_conn()
+        writer = open(conn.name + "_flagged", 'w')
+        flag_log = ""
+        for server in self.__targets:
+            self.__flagged.append(server)
+            name = server.name
+            flag_log = flag_log + (name + "\n")
+        writer.write(flag_log)
+        writer.close()
+        if(self._config.get_emails()["Email"]) == "Y":
+            self.send_emails()
+
+    def send_emails(self):
+        '''
+        Sends warning emails to the owners of all flagged servers, if they have
+        an email to send to. Email settings depend on input args to the script.
+
+        :return: None
+        '''
+        emails = self._config.get_emails()
+        sender = emails["Sender"]
+        smtp_name = emails["smtp_server"]
+        port = emails["smtp_port"]
+        conn = self._get_conn()
+        # Loop over flagged servers to send emails to the users associated with
+        # them.
+        for server in self.__flagged:
+            user = conn.get_user_by_id(server.user_id, False)
+            # Cannot send an email to a user with no email
+            if(user.email is not None):
+                receiver = user.email
+                message = user.name + ", \n Your server, " + server.name
+                message = message + ''' will be deleted in 24 hours, or at the
+                    next call to this script, if you do not change the name of
+                    the server to include 'pet_' at the start of the name. '''
+
+                with smtplib.SMTP(smtp_name, port) as email:
+                    email.sendmail(sender, receiver, message)

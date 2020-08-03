@@ -36,10 +36,10 @@ class Fip(Resource):
                                       dest='static_subnet',
                                       help=_desc)
 
-    def process(self):
-        shade = self._get_shade()
+    def process(self, deletion):
+        conn = self._get_conn()
         self._config.info("Connecting to OpenStack to fetch floating IPs")
-        self.__fips = shade.list_floating_ips()
+        self.__fips = conn.list_floating_ips()
         self._config.info("Found %d floating IPs" % len(self.__fips))
         self.__debug_fips()
         self.__filter_attached()
@@ -48,9 +48,9 @@ class Fip(Resource):
                           len(self.__fips))
 
     def clean(self):
-        shade = self._get_shade()
+        conn = self._get_conn()
         for fip in self.__fips:
-            shade.delete_floating_ip(fip.id)
+            conn.delete_floating_ip(fip.id)
 
     def __filter_attached(self):
         force_attached = self._config.get_arg('with_attached')
@@ -100,3 +100,6 @@ class Fip(Resource):
         """
         net = ip_network(network)
         return lambda x: ip_address(x[field]) in net
+
+    def send_emails(self):
+        raise UnimplementedError("Unimplemented")
