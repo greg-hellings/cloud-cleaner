@@ -148,15 +148,15 @@ class Server(Resource):
             # delete the newline character at the end of the line
             delete_list.append(line[:-1])
 
-        for name in delete_list:
-            server = conn.get_server(name)
+        for id in delete_list:
+            server = conn.get_server(id)
             self.__flagged.append(server)
         reader.write("")
         reader.close()
 
     def write_to_flagged(self):
         """
-        Writes the names of flagged servers to the correct _flagged.txt file,
+        Writes the ids of flagged servers to the correct _flagged.txt file,
         then sends emails if the flag is set in emails.json.
         """
         conn = self._get_conn()
@@ -164,8 +164,8 @@ class Server(Resource):
         flag_log = ""
         for server in self.__targets:
             self.__flagged.append(server)
-            name = server.name
-            flag_log = flag_log + (name + "\n")
+            id = server.id
+            flag_log = flag_log + (id + "\n")
         writer.write(flag_log)
         writer.close()
         if(self._config.get_emails()["Email"]) == "Y":
