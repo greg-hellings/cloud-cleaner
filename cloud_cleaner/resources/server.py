@@ -22,8 +22,6 @@ class Server(Resource):
         # Default objects that pass through all instances without filtering
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
-
-        self.__flagged = []
         self.__deleted_ids = []
 
     def register(self, config):
@@ -49,11 +47,12 @@ class Server(Resource):
         """
         conn = self._get_conn()
         self._config.info("Connecting to OpenStack to retrieve server list")
-        if(deletion):
-            # We only wish to look at servers which have been flagged
-            self.__set_flagged()
-            self.__targets = self.__flagged
-        else:
+        self.__age = self._config.get_arg('age')
+        self.__targets = conn.list_servers()
+        if(deletion and self.__age is not None):
+            self._interval = self.parse_interval(self.__age)
+            self._interval = self._interval + self._interval
+        if(not deletion):
             server_accum = []
             # We only want to look over servers which have not been deleted
             for server in conn.list_servers():
@@ -96,10 +95,17 @@ class Server(Resource):
 
         :return: None
         """
-        age = self._config.get_arg('age')
-        if age is not None:
+        if self._interval is not None:
+            # interval has been set, meaning that we are using a different
+            # time then the one directly fed as an argument
+            self._config.debug("Working with age %s" % (self._interval,))
+            self.__targets = list(filter(self.__right_age, self.__targets))
+            self._config.debug("Parsed ages, servers remaining: ")
+            self.__debug_targets()
+            self._interval = None
+        elif self.__age is not None:
             self._config.debug("Parsing dates")
-            self._interval = self.parse_interval(self._config.get_arg('age'))
+            self._interval = self.parse_interval(self.__age)
             self._config.debug("Working with age %s" % (self._interval,))
             self.__targets = list(filter(self.__right_age, self.__targets))
             self._config.debug("Parsed ages, servers remaining: ")
@@ -131,46 +137,6 @@ class Server(Resource):
         system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)
 
-    def __set_flagged(self):
-        """
-        Processes the txt file associated with the cloud to put all flagged
-        servers into the __flagged field.
-
-        :return: None
-        """
-        self.__flagged = []
-        conn = self._get_conn()
-        # List of server names that have been flagged to possibly be deleted
-        delete_list = []
-        # Open reader for the flagged file
-        reader = open(conn.name + "_flagged", 'r+')
-        for line in reader:
-            # delete the newline character at the end of the line
-            delete_list.append(line[:-1])
-
-        for id in delete_list:
-            server = conn.get_server(id)
-            self.__flagged.append(server)
-        reader.write("")
-        reader.close()
-
-    def write_to_flagged(self):
-        """
-        Writes the ids of flagged servers to the correct _flagged.txt file,
-        then sends emails if the flag is set in emails.json.
-        """
-        conn = self._get_conn()
-        writer = open(conn.name + "_flagged", 'w')
-        flag_log = ""
-        for server in self.__targets:
-            self.__flagged.append(server)
-            id = server.id
-            flag_log = flag_log + (id + "\n")
-        writer.write(flag_log)
-        writer.close()
-        if(self._config.get_emails()["Email"]) == "Y":
-            self.send_emails()
-
     def send_emails(self):
         """
         Sends warning emails to the owners of all flagged servers, if they have
@@ -178,22 +144,23 @@ class Server(Resource):
 
         :return: None
         """
-        emails = self._config.get_emails()
-        sender = emails["Sender"]
-        smtp_name = emails["smtp_server"]
-        port = emails["smtp_port"]
+        sender = self._config.get_arg("sender")
+        smtp_name = self._config.get_arg("smtpN")
+        port = self._config.get_arg("smtpP")
         conn = self._get_conn()
         # Loop over flagged servers to send emails to the users associated with
         # them.
-        for server in self.__flagged:
+        for server in self.__targets:
             user = conn.get_user_by_id(server.user_id, False)
             # Cannot send an email to a user with no email
             if(user.email is not None):
+                skip_name = self._config.get_arg("skip_name")
                 receiver = user.email
                 message = user.name + ", \n Your server, " + server.name
-                message = message + ''' will be deleted in 24 hours, or at the
-                    next call to this script, if you do not change the name of
-                    the server to include 'pet_' at the start of the name. '''
+                message = message + ''' will be deleted at the next call to
+                    this script, if you do not change the name of the server
+                    to include''' + skip_name + ''' at the
+                    start of the name. '''
 
                 with smtplib.SMTP(smtp_name, port) as email:
                     email.sendmail(sender, receiver, message)

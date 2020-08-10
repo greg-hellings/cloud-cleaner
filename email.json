@@ -1,6 +1,0 @@
-{
-  "Email": "Placeholder_for_Y/N",
-  "Sender": "Placeholder_for_str",
-  "smtp_server": "Placeholder_for_str",
-  "smtp_port": "Placeholder_for_int"
-}

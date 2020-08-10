@@ -33,4 +33,5 @@ def cloud_clean(args=sys.argv[1:],  # pylint: disable=W0102
     else:
         print("No changes made, force option not enabled")
     ALL_RESOURCES[config.get_resource()].process(False)
-    ALL_RESOURCES[config.get_resource()].write_to_flagged()
+    if config.get_arg("email"):
+        ALL_RESOURCES[config.get_resource()].send_emails()

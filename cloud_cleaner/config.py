@@ -37,10 +37,24 @@ class CloudCleanerConfig():  # pylint: disable=R0902
                 "(up to 2 times)"
         self.__parser.add_argument("-v", "--verbose", help=_help,
                                    action='count', default=0)
+        _help = "Email warning messages to server creators if their server. " \
+                "is to be deleted. By default, the command does not email. " \
+                "Add this switch to include email."
+        self.__parser.add_argument("--email", "-e",
+                                   help=_help,
+                                   action='store_true')
+        _help = "The email address that should be used to send emails. Only " \
+                "used if --email is set. Required if --email is set."
+        self.__parser.add_argument("--sender", help=_help, default="")
+        _help = "The smtp server name which should be used to send emails. " \
+                "Only used if --email is set. Required if --email is set"
+        self.__parser.add_argument("--smtpN", help=_help, default="")
+        _help = "The smtp server port which should be used to send emails. " \
+                "Only used if --email is set. Required if --email is set"
+        self.__parser.add_argument("--smtpP", help=_help, default=0)
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args
-        self.__emails = self.__set_emails()
         # Defined after options are parsed
         self.__options = None
         self.__cloud = None
@@ -137,26 +151,6 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         :return: The connection object
         """
         return self.__conn
-
-    def __set_emails(self):
-        """
-        Opens email.json and turns its data into a dictionary, returning the
-        json information in the form of a dictionary.
-
-        :return: The dictionary
-        """
-        with open("email.json", "r") as reader:
-            data = json.load(reader)
-        return data
-
-    def get_emails(self):
-        """
-        Get the dictionary holding the email configuration options
-
-        :return: The dictionary
-
-        """
-        return self.__emails
 
     # LOGGING FUNCTIONS
     def info(self, msg, *args):
