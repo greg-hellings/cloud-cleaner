@@ -49,10 +49,10 @@ class Server(Resource):
         self._config.info("Connecting to OpenStack to retrieve server list")
         self.__age = self._config.get_arg('age')
         self.__targets = conn.list_servers()
-        if(deletion and self.__age is not None):
-            self._interval = self.parse_interval(self.__age)
-            self._interval = self._interval + self._interval
         if(not deletion):
+            if(self.__age is not None):
+                self._interval = self.parse_interval(self.__age)
+                self._interval = self._interval / 2
             server_accum = []
             # We only want to look over servers which have not been deleted
             for server in conn.list_servers():
@@ -157,10 +157,10 @@ class Server(Resource):
                 skip_name = self._config.get_arg("skip_name")
                 receiver = user.email
                 message = user.name + ", \n Your server, " + server.name
-                message = message + ''' will be deleted at the next call to
-                    this script, if you do not change the name of the server
-                    to include''' + skip_name + ''' at the
-                    start of the name. '''
+                message = message + ''' may be deleted when its age reaches
+                    ''' + self.__age + ''' if you do not change the name of the
+                    server to include''' + skip_name + ''' at the start of the
+                    name. '''
 
                 with smtplib.SMTP(smtp_name, port) as email:
                     email.sendmail(sender, receiver, message)
