@@ -23,6 +23,7 @@ class Server(Resource):
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
         self.__deleted_ids = []
+        self.__deletion = False
 
     def register(self, config):
         """
@@ -38,7 +39,7 @@ class Server(Resource):
         _desc = "Minimum age (1d, 2w, 6m, 1y)"
         self._sub_config.add_argument("--age", "-a", help=_desc)
 
-    def process(self, deletion):
+    def process(self):
         """
         Fetches the list of servers and processes them to filter out which
         ones ought to actually be deleted.
@@ -49,8 +50,8 @@ class Server(Resource):
         self._config.info("Connecting to OpenStack to retrieve server list")
         self.__age = self._config.get_arg('age')
         self.__targets = conn.list_servers()
-        if(not deletion):
-            if(self.__age is not None):
+        if not self.__deletion:
+            if self.__age is not None:
                 self._interval = self.parse_interval(self.__age)
                 self._interval = self._interval / 2
             server_accum = []
@@ -67,7 +68,8 @@ class Server(Resource):
         # Process for name
         self.__process_names()
         self._config.info("%d servers passed name test" % len(self.__targets))
-        self.__flagged = []
+        # We are now done with deletion(aside from the cleaning itself)
+        self.__deletion = False
 
     def __debug_targets(self):
         for target in self.__targets:
@@ -153,14 +155,24 @@ class Server(Resource):
         for server in self.__targets:
             user = conn.get_user_by_id(server.user_id, False)
             # Cannot send an email to a user with no email
-            if(user.email is not None):
+            if user.email is not None:
                 skip_name = self._config.get_arg("skip_name")
                 receiver = user.email
-                message = user.name + ", \n Your server, " + server.name
-                message = message + ''' may be deleted when its age reaches
-                    ''' + self.__age + ''' if you do not change the name of the
-                    server to include''' + skip_name + ''' at the start of the
-                    name. '''
-
+                message = '''{user}, \n Your server, {server} may be deleted
+                    when its age reaches {age} if you do not change the name
+                    of the server to include {skip} at the start of
+                    the name. '''
+                message = message.format(user=user.name, server=server.name,
+                                         age=self.__age, skip=skip_name)
                 with smtplib.SMTP(smtp_name, port) as email:
                     email.sendmail(sender, receiver, message)
+
+    def prep_deletion(self):
+        """
+        Prepares the server resource for deletion. Sets a flag that will be
+        used in the process function to decide whether we are scanning for
+        deletion or for email warnings.
+
+        :return: None
+        """
+        self.__deletion = True

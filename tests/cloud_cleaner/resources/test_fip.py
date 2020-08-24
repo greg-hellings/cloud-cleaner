@@ -60,18 +60,18 @@ FLOATING_IPS = [
 
 class TestFip(TestCase):
     def __test_with_calls(self, args, calls):
-        shade = Mock()
-        shade.list_floating_ips = Mock(return_value=FLOATING_IPS)
-        shade.delete_floating_ip = Mock()
+        conn = Mock()
+        conn.list_floating_ips = Mock(return_value=FLOATING_IPS)
+        conn.delete_floating_ip = Mock()
         calls = [call(i) for i in calls]
         config = CloudCleanerConfig(args=args)
-        config.get_shade = Mock(return_value=shade)
+        config.get_conn = Mock(return_value=conn)
         fip = Fip()
         fip.register(config)
         config.parse_args()
         fip.process()
         fip.clean()
-        self.assertEqual(shade.delete_floating_ip.call_args_list, calls)
+        self.assertEqual(conn.delete_floating_ip.call_args_list, calls)
 
     def test_resource_type(self):  # pylint: disable=no-self-use
         parser = ArgumentParser()

@@ -88,6 +88,11 @@ class Fip(Resource):
         for fip in self.__fips:
             self._config.debug(fip.floating_ip_address)
 
+    def prep_deletion(self):
+        # Currently the floating ip resource does not need any preparation,
+        # so this function only needs to pass
+        pass
+
     @classmethod
     def __filter_factory(cls, field, network):
         """

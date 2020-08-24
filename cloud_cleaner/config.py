@@ -10,6 +10,23 @@ import json
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DEFAULT_ARGUMENTS = sys.argv
 
+help_strings = {
+    "force": '''Perform delete operations, don't just report them.
+             By default, the command executes a 'dry run'. Add this
+             switch to perform a full run.''',
+    "verb": '''Verbosity level. Add more times for more output
+            (up to 2 times)''',
+    "email": '''Email warning messages to server creators if their server.
+             is to be deleted. By default, the command does not email.
+             Add this switch to include email.''',
+    "sender": '''The email address that should be used to send emails. Only
+              used if --email is set. Required if --email is set.''',
+    "smtpN": '''The smtp server name which should be used to send emails.
+             Only used if --email is set. Required if --email is set''',
+    "smtpP": '''The smtp server port which should be used to send emails.
+             Only used if --email is set. Required if --email is set'''
+}
+
 
 class CloudCleanerConfig():  # pylint: disable=R0902
     """
@@ -27,31 +44,21 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
         # Register global options
-        _help = "Perform delete operations, don't just report them. " \
-                "By default, the command executes a 'dry run'. Add this " \
-                "switch to perform a full run."
         self.__parser.add_argument("--force", "-f",
-                                   help=_help,
+                                   help=help_strings["force"],
                                    action='store_true')
-        _help = "Verbosity level. Add more times for more output "\
-                "(up to 2 times)"
-        self.__parser.add_argument("-v", "--verbose", help=_help,
+        self.__parser.add_argument("-v", "--verbose",
+                                   help=help_strings["verb"],
                                    action='count', default=0)
-        _help = "Email warning messages to server creators if their server. " \
-                "is to be deleted. By default, the command does not email. " \
-                "Add this switch to include email."
         self.__parser.add_argument("--email", "-e",
-                                   help=_help,
+                                   help=help_strings["email"],
                                    action='store_true')
-        _help = "The email address that should be used to send emails. Only " \
-                "used if --email is set. Required if --email is set."
-        self.__parser.add_argument("--sender", help=_help, default="")
-        _help = "The smtp server name which should be used to send emails. " \
-                "Only used if --email is set. Required if --email is set"
-        self.__parser.add_argument("--smtpN", help=_help, default="")
-        _help = "The smtp server port which should be used to send emails. " \
-                "Only used if --email is set. Required if --email is set"
-        self.__parser.add_argument("--smtpP", help=_help, default=0)
+        self.__parser.add_argument("--sender", help=help_strings["sender"],
+                                   default="")
+        self.__parser.add_argument("--smtpN", help=help_strings["smtpN"],
+                                   default="")
+        self.__parser.add_argument("--smtpP", help=help_strings["smtpP"],
+                                   default=0)
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args

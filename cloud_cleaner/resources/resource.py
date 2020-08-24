@@ -57,7 +57,7 @@ class Resource(object):  # pylint: disable=R0205
         self._config = config
         self._sub_config = config.add_subparser(self.type_name)
 
-    def process(self, deletion):  # pylint: disable=no-self-use
+    def process(self):  # pylint: disable=no-self-use
         """
         Override this method in base classes in order to perform the actual
         calls to OpenStack to fetch and filter the processed resources
@@ -95,6 +95,14 @@ class Resource(object):  # pylint: disable=R0205
         return timedelta(days=(days+30*months+years*365),
                          weeks=weeks,
                          hours=hours)
+
+    def prep_deletion(self):
+        """
+        Prepare the resource for deletion. The steps that this entails will
+        vary greatly from resource to resource.
+
+        """
+        raise UnimplementedError("Must override this method")
 
     @classmethod
     def __parse_interval(cls, regex, interval):

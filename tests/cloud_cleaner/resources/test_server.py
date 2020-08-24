@@ -13,6 +13,7 @@ from cloud_cleaner.resources import Server
 
 CURRENT_TIME = datetime.strptime('2018-02-23T16:00:00Z', DATE_FORMAT)
 CURRENT_TIME = CURRENT_TIME.replace(tzinfo=utc)
+SAMPLE_USER = munchify({'email':  None, 'name': 'test-user'})
 SAMPLE_SERVERS = [
     # Server still being built out by OpenStack, should remain
     munchify({
@@ -73,18 +74,39 @@ SAMPLE_SERVERS = [
 
 class ServerTest(TestCase):
     def __test_with_call_order(self, args, calls):
-        shade = Mock()
-        shade.list_servers = Mock(return_value=SAMPLE_SERVERS)
-        shade.delete_server = Mock()
+        conn = Mock()
+        conn.list_servers = Mock(return_value=SAMPLE_SERVERS)
+        conn.delete_server = Mock()
         config = CloudCleanerConfig(args=args)
-        config.get_shade = Mock(return_value=shade)
+        config.get_conn = Mock(return_value=conn)
         calls = [call(c) for c in calls]
         server = Server(now=CURRENT_TIME)
         server.register(config)
         config.parse_args()
+        server.prep_deletion()
         server.process()
         server.clean()
-        self.assertEqual(shade.delete_server.call_args_list, calls)
+        self.assertEqual(conn.delete_server.call_args_list, calls)
+
+    def test_email_with_calls(self):
+        conn = Mock()
+        conn.list_servers = Mock(return_value=SAMPLE_SERVERS)
+        conn.get_user_by_id = Mock(return_value=SAMPLE_USER)
+        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
+                                          "server", "--age", "4d",
+                                          "--skip-name", "test-.*"])
+        config.get_conn = Mock(return_value=conn)
+        calls = ['4', '5']
+        calls = [call(c) for c in calls]
+        server = Server(now=CURRENT_TIME)
+        server.send_emails() = Mock()
+        server.register(config)
+        config.parse_args()
+        server.process()
+        server.send_emails()
+        self.assertEqual(conn.get_user_by_id.call_count, 2)
+        server.clean()
+        self.assertEqual(conn.delete_server.call_args_list, calls)
 
     def test_init_with_name(self):  # pylint: disable=no-self-use
         parser = ArgumentParser()
