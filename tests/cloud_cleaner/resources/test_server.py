@@ -92,6 +92,7 @@ class ServerTest(TestCase):
         conn = Mock()
         conn.list_servers = Mock(return_value=SAMPLE_SERVERS)
         conn.get_user_by_id = Mock(return_value=SAMPLE_USER)
+        conn.delete_server = Mock()
         config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
                                           "server", "--age", "4d",
                                           "--skip-name", "test-.*"])
@@ -107,6 +108,30 @@ class ServerTest(TestCase):
         self.assertEqual(conn.get_user_by_id.call_count, 2)
         server.clean()
         self.assertEqual(conn.delete_server.call_args_list, calls)
+
+    def test_email_with_delete(self):
+        conn = Mock()
+        conn.list_servers = Mock(return_value=SAMPLE_SERVERS)
+        conn.get_user_by_id = Mock(return_value=SAMPLE_USER)
+        conn.delete_server = Mock()
+        config = CloudCleanerConfig(args=["--os-auth-url", "http://no.com",
+                                          "server", "--age", "4d",
+                                          "--skip-name", "test-.*"])
+        config.get_conn = Mock(return_value=conn)
+        server = Server(now=CURRENT_TIME)
+        server.send_emails() = Mock()
+        server.register(config)
+        config.parse_args()
+        server.prep_deletion()
+        server.process()
+        server.clean()
+        server.process()
+        server.send_emails()
+        # Only server 4 should be deleted. As in the test above, servers 4 and
+        # 5 fit the criteria, but this time around server 5 should be deleted,
+        # and thus not considered for an email warning, whereas for server 4
+        # nothing should change. 
+        self.assertEqual(conn.get_user_by_id.call_count, 1)
 
     def test_init_with_name(self):  # pylint: disable=no-self-use
         parser = ArgumentParser()
