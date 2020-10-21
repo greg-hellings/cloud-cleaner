@@ -26,9 +26,13 @@ def cloud_clean(args=sys.argv[1:],  # pylint: disable=W0102
     config.parse_args()
     # Call the process method for the target resource type
     print("Options parsed, fetching resources")
-    ALL_RESOURCES[config.get_resource()].process()
     if config.get_arg("force"):
+        ALL_RESOURCES[config.get_resource()].prep_deletion()
+        ALL_RESOURCES[config.get_resource()].process()
         print("Resources fetched, cleaning")
         ALL_RESOURCES[config.get_resource()].clean()
     else:
         print("No changes made, force option not enabled")
+    ALL_RESOURCES[config.get_resource()].process()
+    if config.get_arg("email"):
+        ALL_RESOURCES[config.get_resource()].send_emails()

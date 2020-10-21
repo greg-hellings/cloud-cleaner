@@ -96,6 +96,14 @@ class Resource(object):  # pylint: disable=R0205
                          weeks=weeks,
                          hours=hours)
 
+    def prep_deletion(self):
+        """
+        Prepare the resource for deletion. The steps that this entails will
+        vary greatly from resource to resource.
+
+        """
+        raise UnimplementedError("Must override this method")
+
     @classmethod
     def __parse_interval(cls, regex, interval):
         match = regex.match(interval)
@@ -103,10 +111,10 @@ class Resource(object):  # pylint: disable=R0205
             return int(match.group(1))
         return 0
 
-    def _get_shade(self):
+    def _get_conn(self):
         if self._config is None:
             return None
-        return self._config.get_shade()
+        return self._config.get_conn()
 
 
 class UnimplementedError(Exception):

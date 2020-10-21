@@ -27,8 +27,7 @@ setup(
         'Topic :: Utilities',
     ],
     install_requires=[
-        'shade',
-        'os-client-config',
+        'openstacksdk',
         'munch',
         'pytz'
     ],

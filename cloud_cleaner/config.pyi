@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, _SubParsersAction
-from shade import OpenStackCloud
+from openstack import Connection
+
 
 class CloudCleanerConfig(object):
     def __init__(self,
@@ -18,7 +19,7 @@ class CloudCleanerConfig(object):
 
     def get_cloud(self): ...
 
-    def get_shade(self) -> OpenStackCloud: ...
+    def get_conn(self) -> Connection: ...
 
     def info(self, msg, *args): ...
 

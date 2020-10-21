@@ -27,7 +27,7 @@ install the application is through a Virtual Environment. To create a virtualenv
 #### Python 3
 `pyvenv cloud-cleaner`
 
-Once the vritualenv is created, you can install the application with the "pip" command, as follows:
+Once the virtualenv is created, you can install the application with the "pip" command, as follows:
 
 ```bash
 source cloud-cleaner/bin/activate
@@ -40,13 +40,13 @@ that virtualenv, this will update you to the latest installed version.
 # Configuration
 
 Cloud Cleaner needs to know about your OpenStack endpoints. It uses the standard
-[os-client-config](https://docs.openstack.org/os-client-config/latest/user/configuration.html) mechanism to configure
+[openstack sdk](https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html) mechanism to configure
 the client for OpenStack access. This mechanism is in standard use across many OpenStack clients already, and by using
 the same library, Cloud Cleaner should be accessible via the standard idioms OpenStack users are accustomed to using.
 
-The three main mechanisms that os-client-config uses are environment variables beginning with OS_, command line flags
+The three main mechanisms that openstack sdk uses are environment variables beginning with OS_, command line flags
 which can be seen by running the command `cloud-clean --help`, or through a yaml file documented as part of the standard
-os-client-config documentation. Check the docs linked above or elsewhere on the Internet to find more about how to
+openstack sdk documentation. Check the docs linked above or elsewhere on the Internet to find more about how to
 properly configure this app to connect to OpenStack.
 
 # Usage
@@ -55,7 +55,7 @@ The general structure of a call to Cloud Cleaner is
 
 `cloud-clean [global_options] {resource} [resource_options]`
 
-The global options are things like verbosity, dry/wet run, OpenStack connection flags, and the like. Calling the
+The global options are things like verbosity, dry/wet run, OpenStack connection flags, email configurations, and the like. Calling the
 program with the "--help" or "-h" flag will give you the full list of those options. The resource is the type of object
 being cleaned up. The general "--help" option should also display all known resource types. These are such things as
 "server" - meaning exactly what it says on the tin or "fip" which is a floating IP address. Each resource type can
@@ -74,6 +74,12 @@ to your OpenStack environment unless run in force mode. This can be done by addi
 the options. Doing so will result in the command performing the actual deletes after fetching and optionally filtering
 the resources.
 
+Cloud Cleaner also features email functionality, wherein the creator of a resource can be emailed if something
+has or will be done to their resource. By default, the program will execute without sending any email. Email functionality
+can be added by adding the global flag "-e" or "--email" to the options. If this is added, then the flags "--sender", "--smtpN",
+and "--smtpP" must be included with the email address to send from, the smtp server name to use, and the smtp port to use. Precisely
+what is emailed, or whether email functionality is included at all, will vary by resource.
+
 ## Resource Specific Options
 
 ### Servers
@@ -81,11 +87,13 @@ the resources.
 Select this type of resource by telling the cloud-clean script to operate on the "server" type. Servers currently
 support three options to filter them down from the full list.
 
-Age filtering, represented by the flag --age will search for any servers older than the specified age. The age uses a
+Age filtering, represented by the flag --age will search for any servers older than the specified age. If a server is half
+or more than half of the specified age, then its creator will be emailed a warning if email functionality is enabled. The age uses a
 basic shorthand and can be measured in hours, days, weeks, months, or years. If you want to select all servers that are
-more than 2 days old, add the option "--age 2d". If you wanted servers more than 2 weeks old, go with "--age 2w". At the
-moment, there is no support for mixing and matching different time durations, so you can't say "1d12h", you
-would have to say "36h".
+more than 2 days old, add the option "--age 2d". If you wanted servers more than 2 weeks old, go with "--age 2w". In this example,
+any server older than 1 week and younger than 2 weeks would have the creator of the server emailed a warning message that their server
+may be deleted at some point in the future. At the moment, there is no support for mixing and matching different time durations,
+so you can't say "1d12h", you would have to say "36h".
 
 Name filtering, represented by the flag "--name" accepts a Python-compatible regular expression that will get matched
 against the name using Python's standard "match" function. Note that the "match" function defaults to matching against
@@ -123,6 +131,9 @@ Python 2.6+) and 3. In general, you can specify syntax such as "10.0.0.0/8" or "
 
 If only floating IP addresses associated with a particular fixed IP subnet should be considered, then the option
 "--static-subnet" should be used. This uses the same syntax and parsing library as the --floating-subnet option above.
+
+As of right now no email functionality is included for Floating IPs. Attempting to do so will incur an UnimplementedError.
+It is recommended to not include any of the email flags when cleaning Floating IPs.
 
 As one would expect, any combination of these options can be used. They will all be applied, and only floating IPs that
 match all conditions will be up for deletion.
