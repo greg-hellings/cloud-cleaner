@@ -7,7 +7,7 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     outputs:
-      envs: ${{ steps.envs.outputs.envs }}
+      envs: "${{ steps.envs.outputs.envs }}"
     steps:
       - uses: actions/checkout@v2
       - id: envs
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: ${{ fromJson(needs.collect.outputs.envs) }}
+        environment: "${{ fromJson(needs.collect.outputs.envs) }}"
     steps:
       - uses: actions/checkout@v2
       - uses: greg-hellings/tox-run@master
