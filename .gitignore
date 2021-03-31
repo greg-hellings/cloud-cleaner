@@ -10,3 +10,4 @@ htmlcov
 build
 dist
 .*.swp
+coverage.xml
