@@ -1,0 +1,30 @@
+name: Test code
+
+"on":
+  push: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    outputs:
+      envs: ${{ steps.envs.outputs.envs }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Collect outputs
+        id: envs
+        uses: greg-hellings/tox-list@master
+
+  test:
+    needs:
+      - collect
+    runs-on: ubuntu-latest
+    matrix:
+      environment: ${{ fromJson(needs.collect.outputs.envs) }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
