@@ -9,11 +9,9 @@ jobs:
     outputs:
       envs: ${{ steps.envs.outputs.envs }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Collect outputs
-        id: envs
-        uses: greg-hellings/tox-list@master
+      - uses: actions/checkout@v2
+      - id: envs
+        uses: greg-hellings/tox-list@v1
 
   test:
     needs:
@@ -24,9 +22,7 @@ jobs:
       matrix:
         environment: ${{ fromJson(needs.collect.outputs.envs) }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Install Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+      - uses: greg-hellings/tox-run@master
         with:
-          python-version: '3.x'
+          tox-env: ${{ matrix.environment }}
