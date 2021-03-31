@@ -19,8 +19,10 @@ jobs:
     needs:
       - collect
     runs-on: ubuntu-latest
-    matrix:
-      environment: ${{ fromJson(needs.collect.outputs.envs) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.collect.outputs.envs) }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
