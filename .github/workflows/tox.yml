@@ -7,7 +7,7 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     outputs:
-      envs: ${{ steps.envs.outputs.tox-envs }}
+      envs: ${{ steps.envs.outputs.envs }}
     steps:
       - uses: actions/checkout@v2
       - id: envs
