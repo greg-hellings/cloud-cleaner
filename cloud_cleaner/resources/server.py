@@ -16,7 +16,7 @@ class Server(Resource):
     type_name = "server"
 
     def __init__(self, *args, **kwargs):
-        super(Server, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__targets = []
         self._interval = None
         # Default objects that pass through all instances without filtering
@@ -30,7 +30,7 @@ class Server(Resource):
 
         :type parser: argparse.ArgumentParser
         """
-        super(Server, self).register(config)
+        super().register(config)
         _desc = "Regex to match the name of the servers"
         self._sub_config.add_argument("--name", "-n", help=_desc)
         _desc = "Regex to match for servers to ignore"

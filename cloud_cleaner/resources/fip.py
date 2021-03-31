@@ -14,11 +14,11 @@ class Fip(Resource):
     type_name = "fip"
 
     def __init__(self):
-        super(Fip, self).__init__()
+        super().__init__()
         self.__fips = []
 
     def register(self, config):
-        super(Fip, self).register(config)
+        super().register(config)
         _desc = "By default, only FIPs not attached are considered. Include "\
                 "this flag to consider ALL fips"
         self._sub_config.add_argument("--with-attached",
