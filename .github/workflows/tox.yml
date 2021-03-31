@@ -23,6 +23,16 @@ jobs:
         environment: "${{ fromJson(needs.collect.outputs.envs) }}"
     steps:
       - uses: actions/checkout@v2
-      - uses: greg-hellings/tox-run@master
+      - uses: greg-hellings/tox-python-version@v1
         with:
           tox-env: ${{ matrix.environment }}
+        id: python-version
+      - uses: action/setup-python@v2
+        with:
+          python-version: ${{ steps.python-version.outputs.python-version }}
+      - name: Install and run tox
+        shell: bash
+        run: |
+          set -ex -o pipefail
+          python -m pip install tox
+          tox -e ${{ matrix.environment }}
