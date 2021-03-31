@@ -27,7 +27,7 @@ jobs:
         with:
           tox-env: ${{ matrix.environment }}
         id: python-version
-      - uses: action/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ steps.python-version.outputs.python-version }}
       - name: Install and run tox
