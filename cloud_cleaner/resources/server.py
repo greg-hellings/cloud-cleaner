@@ -153,17 +153,27 @@ class Server(Resource):
         # Loop over flagged servers to send emails to the users associated with
         # them.
         for server in self.__targets:
-            user = conn.get_user_by_id(server.user_id, False)
-            # Cannot send an email to a user with no email
-            if user.email is not None:
-                skip_name = self._config.get_arg("skip_name")
-                receiver = user.email
-                message = '''{user}, \n Your server, {server} may be deleted
-                    when its age reaches {age} if you do not change the name
-                    of the server to include {skip} at the start of
-                    the name. '''
-                message = message.format(user=user.name, server=server.name,
-                                         age=self.__age, skip=skip_name)
+            receiver = self._config.get_arg("receiver")
+            skip_name = self._config.get_arg("skip_name")
+            message = '''{user}, \n Your server, {server} may be deleted
+                when its age reaches {age} if you do not change the name
+                of the server to include {skip} at the start of
+                the name. '''
+            if receiver == "":
+                user = conn.get_user_by_id(server.user_id, False)
+                # Cannot send an email to a user with no email
+                if user.email is not None:
+                    receiver = user.email
+                    message = message.format(user=user.name,
+                                             server=server.name,
+                                             age=self.__age, skip=skip_name)
+                    with smtplib.SMTP(smtp_name, port) as email:
+                        email.sendmail(sender, receiver, message)
+            else:
+                # We have a receiver set and do not need to check for a user's
+                # email
+                message = message.format(user=receiver, server=server.name,
+                                         age=self.__age, skip=server.name)
                 with smtplib.SMTP(smtp_name, port) as email:
                     email.sendmail(sender, receiver, message)
 

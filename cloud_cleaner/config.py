@@ -24,7 +24,10 @@ help_strings = {
     "smtpN": '''The smtp server name which should be used to send emails.
              Only used if --email is set. Required if --email is set''',
     "smtpP": '''The smtp server port which should be used to send emails.
-             Only used if --email is set. Required if --email is set'''
+             Only used if --email is set. Required if --email is set''',
+    "receiver": '''The email address that should be used to receive emails.
+             Only used if --email is set. Required if --email is set.'''
+
 }
 
 
@@ -54,6 +57,8 @@ class CloudCleanerConfig():  # pylint: disable=R0902
                                    help=help_strings["email"],
                                    action='store_true')
         self.__parser.add_argument("--sender", help=help_strings["sender"],
+                                   default="")
+        self.__parser.add_argument("--receiver", help=help_strings["receiver"],
                                    default="")
         self.__parser.add_argument("--smtpN", help=help_strings["smtpN"],
                                    default="")
