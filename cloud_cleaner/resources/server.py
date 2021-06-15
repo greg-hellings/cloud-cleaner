@@ -150,32 +150,49 @@ class Server(Resource):
         smtp_name = self._config.get_arg("smtpN")
         port = self._config.get_arg("smtpP")
         conn = self._get_conn()
+        receiver = self._config.get_arg("receiver")
+        skip_name = self._config.get_arg("skip_name")
+        servers = []
+        receivers = []
+        users = []
+        message = '''{user}, \n The following server(s) may be deleted when
+            its(their) age reaches {age} if you do not change the
+            name of the server(s) to include {skip} at the start of the name.
+            These are the names of the servers: {server} '''
+
         # Loop over flagged servers to send emails to the users associated with
         # them.
         for server in self.__targets:
-            receiver = self._config.get_arg("receiver")
-            skip_name = self._config.get_arg("skip_name")
-            message = '''{user}, \n Your server, {server} may be deleted
-                when its age reaches {age} if you do not change the name
-                of the server to include {skip} at the start of
-                the name. '''
             if receiver == "":
+                # We need to collect information on who to send emails to
                 user = conn.get_user_by_id(server.user_id, False)
                 # Cannot send an email to a user with no email
                 if user.email is not None:
-                    receiver = user.email
-                    message = message.format(user=user.name,
-                                             server=server.name,
-                                             age=self.__age, skip=skip_name)
-                    with smtplib.SMTP(smtp_name, port) as email:
-                        email.sendmail(sender, receiver, message)
+                    users.append(user.name)
+                    receivers.append(user.email)
+                    servers.append(server.name)
             else:
-                # We have a receiver set and do not need to check for a user's
-                # email
-                message = message.format(user=receiver, server=server.name,
-                                         age=self.__age, skip=server.name)
-                with smtplib.SMTP(smtp_name, port) as email:
-                    email.sendmail(sender, receiver, message)
+                # We only need to collect the server names
+                servers.append(server.name)
+
+        for i in range(len(servers)):
+            # Set the values which will send this email(s)
+            if receiver != "":
+                server = '\n'.join(servers)
+                user = receiver
+                receiver_email = receiver
+            else:
+                server = servers[i]
+                user = users[i]
+                receiver_email = receivers[i]
+            message = message.format(user=user, server=server,
+                                     age=self.__age, skip=skip_name)
+            with smtplib.SMTP(smtp_name, port) as email:
+                email.sendmail(sender, receiver_email, message)
+            if receiver != "":
+                # We have sent the email to the receiver, and do not need to
+                # send any more.
+                break
 
     def prep_deletion(self):
         """
