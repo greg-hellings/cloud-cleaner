@@ -155,10 +155,6 @@ class Server(Resource):
         servers = []
         receivers = []
         users = []
-        message = '''{user}, \n The following server(s) may be deleted when
-            its(their) age reaches {age} if you do not change the
-            name of the server(s) to include {skip} at the start of the name.
-            These are the names of the servers: {server} '''
 
         # Loop over flagged servers to send emails to the users associated with
         # them.
@@ -185,6 +181,10 @@ class Server(Resource):
                 server = servers[i]
                 user = users[i]
                 receiver_email = receivers[i]
+            message = message = '''{user}, \n The following server(s) may be deleted when
+                its(their) age reaches {age} if you do not change the
+                name of the server(s) to include {skip} at the start of the name.
+                These are the names of the servers: {server} '''
             message = message.format(user=user, server=server,
                                      age=self.__age, skip=skip_name)
             with smtplib.SMTP(smtp_name, port) as email:
