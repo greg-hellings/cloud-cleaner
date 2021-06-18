@@ -26,7 +26,8 @@ help_strings = {
     "smtpP": '''The smtp server port which should be used to send emails.
              Only used if --email is set. Required if --email is set''',
     "receiver": '''The email address that should be used to receive emails.
-             Only used if --email is set. Required if --email is set.'''
+             Only used if --email is set. Optional, only use if all emails
+             should be sent to one email address.'''
 
 }
 
