@@ -135,6 +135,8 @@ class Server(Resource):
                self.__name.match(target.name)
 
     def __right_age(self, target):
+        if target.launched_at is None:
+            return False
         system_age = datetime.strptime(target.launched_at, DATE_FORMAT)
         system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)
@@ -150,22 +152,36 @@ class Server(Resource):
         smtp_name = self._config.get_arg("smtpN")
         port = self._config.get_arg("smtpP")
         conn = self._get_conn()
-        # Loop over flagged servers to send emails to the users associated with
-        # them.
+        receiver = self._config.get_arg("receiver")
+        skip_name = self._config.get_arg("skip_name")
+        servers = {}
+
+        # Loop over flagged servers to send emails to the proper recipient
         for server in self.__targets:
             user = conn.get_user_by_id(server.user_id, False)
-            # Cannot send an email to a user with no email
-            if user.email is not None:
-                skip_name = self._config.get_arg("skip_name")
-                receiver = user.email
-                message = '''{user}, \n Your server, {server} may be deleted
-                    when its age reaches {age} if you do not change the name
-                    of the server to include {skip} at the start of
-                    the name. '''
-                message = message.format(user=user.name, server=server.name,
-                                         age=self.__age, skip=skip_name)
-                with smtplib.SMTP(smtp_name, port) as email:
-                    email.sendmail(sender, receiver, message)
+            # If the receiver flag is set, we want to email that address for
+            # everything.
+            recipient = receiver if receiver != "" else user.email
+            name = receiver if receiver != "" else user.name
+            if recipient in servers:
+                servers[recipient]["servers"].append(server.name)
+            else:
+                servers[recipient] = {"servers": [server.name], "name": name}
+
+        for email in servers:
+            # Set the values which will send this email(s)
+            server_names = "\n".join(servers[email]["servers"])
+            user = servers[email]["name"]
+            message = message = (
+                "{user}, The following server(s) may be deleted when its"
+                " (their) age reaches {age} if you do not change the name of"
+                " the server(s) to include {skip} at the start of the name."
+                " These are the names of the servers:\n{server}"
+            )
+            message = message.format(user=user, server=server_names,
+                                     age=self.__age, skip=skip_name)
+            with smtplib.SMTP(smtp_name, port) as emailer:
+                emailer.sendmail(sender, email, message)
 
     def prep_deletion(self):
         """
