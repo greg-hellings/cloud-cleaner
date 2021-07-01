@@ -135,6 +135,8 @@ class Server(Resource):
                self.__name.match(target.name)
 
     def __right_age(self, target):
+        if target.launched_at is None:
+            return False
         system_age = datetime.strptime(target.launched_at, DATE_FORMAT)
         system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)
