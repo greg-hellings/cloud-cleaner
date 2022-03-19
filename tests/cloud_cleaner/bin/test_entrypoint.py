@@ -1,13 +1,17 @@
 from sys import version_info
 from unittest import TestCase
+
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
+
 from argparse import ArgumentParser
+
 from keystoneauth1.exceptions.auth_plugins import MissingRequiredOptions
-from cloud_cleaner.bin.entrypoint import cloud_clean
+
 from cloud_cleaner import config as config_module
+from cloud_cleaner.bin.entrypoint import cloud_clean
 from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import ALL_RESOURCES
 
@@ -30,8 +34,10 @@ class TestEntrypoint(TestCase):
         config = CloudCleanerConfig(args=[])
         ALL_RESOURCES["server"].process = Mock()
         ALL_RESOURCES["server"].clean = Mock()
-        cloud_clean(args=["--os-auth-url", "http://no.com", "server",
-                          "--name", "derp"], config=config)
+        cloud_clean(
+            args=["--os-auth-url", "http://no.com", "server", "--name", "derp"],
+            config=config,
+        )
         self.assertEqual("server", config.get_resource())
         self.assertEqual("derp", config.get_arg("name"))
         self.assertEqual(1, len(ALL_RESOURCES["server"].process.mock_calls))

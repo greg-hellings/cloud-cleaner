@@ -1,7 +1,8 @@
 from unittest import TestCase
+
 from cloud_cleaner.resources import ALL_RESOURCES
-from cloud_cleaner.resources.server import Server
 from cloud_cleaner.resources.fip import Fip
+from cloud_cleaner.resources.server import Server
 
 
 class TestAll(TestCase):

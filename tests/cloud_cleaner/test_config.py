@@ -1,7 +1,9 @@
-from unittest import TestCase
 from argparse import ArgumentParser
-from logging import getLogger, WARNING, INFO, DEBUG
-from openstack import OpenStackCloud
+from logging import DEBUG, INFO, WARNING, getLogger
+from unittest import TestCase
+
+from openstack.connection import Connection
+
 from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import ALL_RESOURCES
 
@@ -41,7 +43,7 @@ class TestConfig(TestCase):
         log = getLogger("cloud_cleaner")
         self.assertEqual(log.getEffectiveLevel(), INFO)
         conn = config.get_conn()
-        self.assertIsInstance(conn, OpenStackCloud)
+        self.assertIsInstance(conn, Connection)
 
     def test_verbose_two(self):
         args = ["--os-auth-url", "http://no.com", "-vv", "server"]

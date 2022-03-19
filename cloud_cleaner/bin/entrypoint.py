@@ -2,12 +2,12 @@
 Entry-point methods for CLI commands
 """
 import sys
+
 from cloud_cleaner.config import CloudCleanerConfig
 from cloud_cleaner.resources import ALL_RESOURCES
 
 
-def cloud_clean(args=sys.argv[1:],  # pylint: disable=W0102
-                config=None):
+def cloud_clean(args=sys.argv[1:], config=None):  # pylint: disable=W0102
     """
     Entrypoint for the cloud-clean CLI interface
 
@@ -32,7 +32,7 @@ def cloud_clean(args=sys.argv[1:],  # pylint: disable=W0102
         print("Resources fetched, cleaning")
         ALL_RESOURCES[config.get_resource()].clean()
     else:
+        ALL_RESOURCES[config.get_resource()].process()
         print("No changes made, force option not enabled")
-    ALL_RESOURCES[config.get_resource()].process()
     if config.get_arg("email"):
         ALL_RESOURCES[config.get_resource()].send_emails()

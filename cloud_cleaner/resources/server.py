@@ -2,7 +2,10 @@
 import re
 import smtplib
 from datetime import datetime
+from typing import Any, List
+
 from pytz import utc
+
 from cloud_cleaner.config import DATE_FORMAT
 from cloud_cleaner.resources.resource import Resource
 from cloud_cleaner.string_matcher import StringMatcher
@@ -13,17 +16,19 @@ class Server(Resource):
     Performs processing and cleansing of instances of servers from the
     configured OpenStack endpoints
     """
+
     type_name = "server"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.__targets = []
+        self.__targets: List[Any] = []
         self._interval = None
         # Default objects that pass through all instances without filtering
         self.__skip_name = StringMatcher(False)
         self.__name = StringMatcher(True)
-        self.__deleted_ids = []
+        self.__deleted_ids: List[str] = []
         self.__deletion = False
+        self.__age = None
 
     def register(self, config):
         """
@@ -34,8 +39,7 @@ class Server(Resource):
         _desc = "Regex to match the name of the servers"
         self._sub_config.add_argument("--name", "-n", help=_desc)
         _desc = "Regex to match for servers to ignore"
-        self._sub_config.add_argument("--skip-name", "-s", dest="skip_name",
-                                      help=_desc)
+        self._sub_config.add_argument("--skip-name", "-s", dest="skip_name", help=_desc)
         _desc = "Minimum age (1d, 2w, 6m, 1y)"
         self._sub_config.add_argument("--age", "-a", help=_desc)
 
@@ -48,18 +52,15 @@ class Server(Resource):
         """
         conn = self._get_conn()
         self._config.info("Connecting to OpenStack to retrieve server list")
-        self.__age = self._config.get_arg('age')
+        self.__age = self._config.get_arg("age")
         self.__targets = conn.list_servers()
         if not self.__deletion:
             if self.__age is not None:
                 self._interval = self.parse_interval(self.__age)
                 self._interval = self._interval / 2
-            server_accum = []
-            # We only want to look over servers which have not been deleted
-            for server in conn.list_servers():
-                if server.id not in self.__deleted_ids:
-                    server_accum.append(server)
-            self.__targets = server_accum
+            self.__targets = [
+                s for s in self.__targets if s.id not in self.__deleted_ids
+            ]
         self._config.info("Found %d servers" % len(self.__targets))
         self.__debug_targets()
         # Process for time
@@ -74,6 +75,11 @@ class Server(Resource):
     def __debug_targets(self):
         for target in self.__targets:
             self._config.debug("   *** " + target.name)
+
+    @property
+    def targets(self):
+        """A list of the servers that are going to be deleted"""
+        return self.__targets
 
     def clean(self):
         """
@@ -119,7 +125,7 @@ class Server(Resource):
         skip_name = self._config.get_arg("skip_name")
         if skip_name is not None:
             self.__skip_name = re.compile(skip_name)
-        name = self._config.get_arg('name')
+        name = self._config.get_arg("name")
         if name is not None:
             self.__name = re.compile(name)
         if name is not None or skip_name is not None:
@@ -131,11 +137,12 @@ class Server(Resource):
             self._config.debug("No name restrictions provided")
 
     def __right_name(self, target):
-        return not self.__skip_name.match(target.name) and \
-               self.__name.match(target.name)
+        return not self.__skip_name.match(target.name) and self.__name.match(
+            target.name
+        )
 
     def __right_age(self, target):
-        system_age = datetime.strptime(target.launched_at, DATE_FORMAT)
+        system_age = datetime.strptime(target.created, DATE_FORMAT)
         system_age = system_age.replace(tzinfo=utc)
         return self._now > (system_age + self._interval)
 
@@ -158,12 +165,13 @@ class Server(Resource):
             if user.email is not None:
                 skip_name = self._config.get_arg("skip_name")
                 receiver = user.email
-                message = '''{user}, \n Your server, {server} may be deleted
+                message = """{user}, \n Your server, {server} may be deleted
                     when its age reaches {age} if you do not change the name
                     of the server to include {skip} at the start of
-                    the name. '''
-                message = message.format(user=user.name, server=server.name,
-                                         age=self.__age, skip=skip_name)
+                    the name. """
+                message = message.format(
+                    user=user.name, server=server.name, age=self.__age, skip=skip_name
+                )
                 with smtplib.SMTP(smtp_name, port) as email:
                     email.sendmail(sender, receiver, message)
 

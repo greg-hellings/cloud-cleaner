@@ -1,0 +1,16 @@
+[MASTER]
+
+ignore = setup.py
+
+ignore-patterns = test_.*\.py
+
+[MESSAGES CONTROL]
+
+disable =
+    missing-module-docstring
+
+[REPORTS]
+output-format = colorized
+
+[IMPORTS]
+preferred-modules =

@@ -4,37 +4,38 @@ Contains CloudCleanerConfig for configuring the CLI options in this program
 import logging
 import sys
 from argparse import ArgumentParser
-import openstack
-import json
 
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+import openstack
+
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 DEFAULT_ARGUMENTS = sys.argv
 
 help_strings = {
-    "force": '''Perform delete operations, don't just report them.
+    "force": """Perform delete operations, don't just report them.
              By default, the command executes a 'dry run'. Add this
-             switch to perform a full run.''',
-    "verb": '''Verbosity level. Add more times for more output
-            (up to 2 times)''',
-    "email": '''Email warning messages to server creators if their server.
+             switch to perform a full run.""",
+    "verb": """Verbosity level. Add more times for more output
+            (up to 2 times)""",
+    "email": """Email warning messages to server creators if their server.
              is to be deleted. By default, the command does not email.
-             Add this switch to include email.''',
-    "sender": '''The email address that should be used to send emails. Only
-              used if --email is set. Required if --email is set.''',
-    "smtpN": '''The smtp server name which should be used to send emails.
-             Only used if --email is set. Required if --email is set''',
-    "smtpP": '''The smtp server port which should be used to send emails.
-             Only used if --email is set. Required if --email is set'''
+             Add this switch to include email.""",
+    "sender": """The email address that should be used to send emails. Only
+              used if --email is set. Required if --email is set.""",
+    "smtpN": """The smtp server name which should be used to send emails.
+             Only used if --email is set. Required if --email is set""",
+    "smtpP": """The smtp server port which should be used to send emails.
+             Only used if --email is set. Required if --email is set""",
 }
 
 
-class CloudCleanerConfig():  # pylint: disable=R0902
+class CloudCleanerConfig:  # pylint: disable=R0902
     """
     Contains config options for the entirety of this program, handles setting
     and parsing the global config options related to OpenStack. And also
     provides convenient interfaces for Resource type definitions to define
     their own sub-options and fetch back their parsed values.
     """
+
     def __init__(self, parser=None, args=None):
         if parser is None:
             parser = ArgumentParser()
@@ -44,21 +45,18 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         self.__cloud_config.register_argparse_arguments(parser, args)
         self.__parser = parser
         # Register global options
-        self.__parser.add_argument("--force", "-f",
-                                   help=help_strings["force"],
-                                   action='store_true')
-        self.__parser.add_argument("-v", "--verbose",
-                                   help=help_strings["verb"],
-                                   action='count', default=0)
-        self.__parser.add_argument("--email", "-e",
-                                   help=help_strings["email"],
-                                   action='store_true')
-        self.__parser.add_argument("--sender", help=help_strings["sender"],
-                                   default="")
-        self.__parser.add_argument("--smtpN", help=help_strings["smtpN"],
-                                   default="")
-        self.__parser.add_argument("--smtpP", help=help_strings["smtpP"],
-                                   default=0)
+        self.__parser.add_argument(
+            "--force", "-f", help=help_strings["force"], action="store_true"
+        )
+        self.__parser.add_argument(
+            "-v", "--verbose", help=help_strings["verb"], action="count", default=0
+        )
+        self.__parser.add_argument(
+            "--email", "-e", help=help_strings["email"], action="store_true"
+        )
+        self.__parser.add_argument("--sender", help=help_strings["sender"], default="")
+        self.__parser.add_argument("--smtpN", help=help_strings["smtpN"], default="")
+        self.__parser.add_argument("--smtpP", help=help_strings["smtpP"], default=0)
         self.__sub_parsers = self.__parser.add_subparsers(dest="resource")
         self.__sub_parser_set = {}
         self.__args = args
@@ -101,7 +99,7 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         results = self.__parser.parse_args(self.__args)
         self.__options = vars(results)
         # Set logging level based on verbosity
-        debug = self.get_arg('verbose')
+        debug = self.get_arg("verbose")
         if debug == 0:
             self.__log.setLevel(logging.WARNING)
         if debug == 1:
@@ -138,7 +136,7 @@ class CloudCleanerConfig():  # pylint: disable=R0902
         """
         if self.__options is None:
             return None
-        return self.__options['resource']
+        return self.__options["resource"]
 
     def get_cloud(self):
         """

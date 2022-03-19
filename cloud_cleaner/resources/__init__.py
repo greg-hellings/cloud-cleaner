@@ -11,11 +11,7 @@ concrete classes. These should be considered singleton objects and their
 instances ought to be acted upon directly, instead of creating new instances
 of their underlying classes.
 """
-from .server import Server
 from .fip import Fip
+from .server import Server
 
-
-ALL_RESOURCES = {
-    'server': Server(),
-    'fip': Fip()
-}
+ALL_RESOURCES = {"server": Server(), "fip": Fip()}

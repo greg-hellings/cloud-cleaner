@@ -1,14 +1,14 @@
 """Contains the Resource base class for CLI processing"""
 import re
 from datetime import datetime, timedelta
+
 from pytz import utc
 
-
-HOUR = re.compile(r'(\d+)h')
-DAY = re.compile(r'(\d+)d')
-WEEK = re.compile(r'(\d+)w')
-MONTH = re.compile(r'(\d+)m')
-YEAR = re.compile(r'(\d+)y')
+HOUR = re.compile(r"(\d+)h")
+DAY = re.compile(r"(\d+)d")
+WEEK = re.compile(r"(\d+)w")
+MONTH = re.compile(r"(\d+)m")
+YEAR = re.compile(r"(\d+)y")
 
 
 # PyLint disabled because removing the (object) call here causes errors in
@@ -33,13 +33,14 @@ class Resource(object):  # pylint: disable=R0205
     you to add CLI options to self._sub_config for handling those
     arguments.
     """
+
     type_name = "resource"
 
     def __init__(self, **kwargs):
         self._config = None
         self._sub_config = None
-        if 'now' in kwargs.keys():
-            self._now = kwargs['now']
+        if "now" in kwargs.keys():
+            self._now = kwargs["now"]
         else:
             self._now = datetime.now(utc)
 
@@ -64,7 +65,7 @@ class Resource(object):  # pylint: disable=R0205
 
         :return: None
         """
-        raise UnimplementedError("Must override this method")
+        raise NotImplementedError("Must override this method")
 
     def clean(self):  # pylint: disable=no-self-use
         """
@@ -73,7 +74,7 @@ class Resource(object):  # pylint: disable=R0205
 
         :return: None
         """
-        raise UnimplementedError("Must override this method")
+        raise NotImplementedError("Must override this method")
 
     def parse_interval(self, interval):
         """
@@ -92,9 +93,9 @@ class Resource(object):  # pylint: disable=R0205
         weeks = self.__parse_interval(WEEK, interval)
         months = self.__parse_interval(MONTH, interval)
         years = self.__parse_interval(YEAR, interval)
-        return timedelta(days=(days+30*months+years*365),
-                         weeks=weeks,
-                         hours=hours)
+        return timedelta(
+            days=(days + 30 * months + years * 365), weeks=weeks, hours=hours
+        )
 
     def prep_deletion(self):
         """
@@ -102,7 +103,7 @@ class Resource(object):  # pylint: disable=R0205
         vary greatly from resource to resource.
 
         """
-        raise UnimplementedError("Must override this method")
+        raise NotImplementedError("Must override this method")
 
     @classmethod
     def __parse_interval(cls, regex, interval):
@@ -115,7 +116,3 @@ class Resource(object):  # pylint: disable=R0205
         if self._config is None:
             return None
         return self._config.get_conn()
-
-
-class UnimplementedError(Exception):
-    """Error indicating called method needs to be overridden"""
